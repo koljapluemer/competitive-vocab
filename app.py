@@ -24,4 +24,19 @@ def main_test():
 
     picked_vocab = random.choice(vocab)
 
-    return render_template('game_from_four.html', vocab=picked_vocab)
+    list_without_picked = [x for x in vocab if x != picked_vocab]
+    first_wrong_answer = random.choice(list_without_picked)
+    list_without_picked = [x for x in list_without_picked if x != first_wrong_answer]
+    second_wrong_answer = random.choice(list_without_picked)
+    list_without_picked = [x for x in list_without_picked if x != second_wrong_answer]
+    third_wrong_answer = random.choice(list_without_picked)
+
+    answer_options = [
+        picked_vocab[1],
+        first_wrong_answer[1],
+        second_wrong_answer[1],
+        third_wrong_answer[1]
+    ]
+    random.shuffle(answer_options)
+
+    return render_template('game_from_four.html', en_prompt=picked_vocab[0], answer_options=answer_options, correct_answer=picked_vocab[1])

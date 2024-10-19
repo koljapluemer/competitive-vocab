@@ -1,20 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocab Compete</title>
+    <title>Language Game</title>
+    <script>
+        // Initialize counter for wrong answers
+        let wrongAnswerCount = 0;
+
+        // Function to handle button clicks
+        function checkAnswer(selectedAnswer, correctAnswer, button) {
+            if (selectedAnswer === correctAnswer) {
+                // Call Flask function when the correct answer is selected
+                fetch('/right_answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ wrongAnswerCount: wrongAnswerCount })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert("Correct! Wrong attempts: " + wrongAnswerCount);
+                    // Reload or move to the next prompt
+                    location.reload();
+                });
+            } else {
+                // Increment wrong answer counter and mark the button red
+                wrongAnswerCount++;
+                button.classList.add('bg-red-500');
+            }
+        }
+    </script>
 </head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+    <div class="p-6 bg-white shadow-md rounded-lg text-center">
+        <h1 class="text-4xl font-bold mb-6">{{ en_prompt }}</h1>
 
-<body>
-
-    <h1>Select the correct answer:</h1>
-
-    <div class=""> {{vocab[0]}} </div>
-    <div class=""> {{vocab[1]}} </div>
-   
-
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Loop through answer options to create buttons -->
+            {% for option in answer_options %}
+            <button 
+                class="btn btn-lg btn-primary text-xl w-full"
+                onclick="checkAnswer('{{ option }}', '{{ correct_answer }}', this)">
+                {{ option }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
 </body>
-
 </html>
