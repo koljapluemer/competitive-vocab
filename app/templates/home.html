@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Competitive Vocab{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center">
+    <h2 class="text-2xl font-bold mb-4">Welcome to Competitive Vocab!</h2>
+
+    <!-- Button to create a competition -->
+    <a href="{{ url_for('main.create_competition') }}" class="btn btn-primary mb-4">Create a Competition</a>
+
+    <!-- Input to join a competition -->
+    <form action="{{ url_for('main.join_competition') }}" method="POST" class="flex flex-col items-center">
+        <input type="text" name="competition_code" placeholder="Enter competition code" class="input input-bordered mb-4 w-full max-w-xs">
+        <button type="submit" class="btn btn-secondary">Join Competition</button>
+    </form>
+</div>
+{% endblock %}

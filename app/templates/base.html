@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Competitive Vocab{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+    <!-- Navigation or Header -->
+    <header class="p-5 bg-blue-600 text-white text-center">
+        <h1 class="text-3xl">Competitive Vocab</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-6">
+        {% block content %}
+        <!-- This section will be replaced by child templates -->
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center p-4 mt-10 text-sm text-gray-600">
+        &copy; 2024 Competitive Vocab
+    </footer>
+
+</body>
+</html>
