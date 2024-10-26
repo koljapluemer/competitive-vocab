@@ -65,7 +65,7 @@ const setNewQuestion = () => {
 
 const selectAnswer = (selected) => {
   if (selected === currentQuestion.value.ar) {
-    const newScore = userStore.userScore + 1;
+    const newScore = userStore.userScore + 3;
     userStore.updateScore(newScore); // Update both Supabase and store
     setNewQuestion();
   }

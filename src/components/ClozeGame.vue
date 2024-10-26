@@ -63,7 +63,7 @@ import { supabase } from '../supabase'; // Import the Supabase client directly
   
   const checkAnswer = () => {
     if (inputAnswer.value === parts.value.find(part => part.type === 'input').value) {
-      score.value += 1;
+      score.value += 5;
       userStore.updateScore(score.value); // Update score in global store and Supabase
       loadNewWord(); // Load the next word if answer is correct
     }
