@@ -23,6 +23,13 @@
       </button>
     </nav>
   </header>
+
+  <div class="" v-else>
+    <button class="btn">
+        <router-link to="/">Select User</router-link>
+    </button>
+
+  </div>
 </template>
 
 <script setup>
