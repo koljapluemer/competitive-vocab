@@ -1,25 +1,28 @@
 <template>
   <div class="text-center">
-    <h2 class="text-2xl mb-4 font-bold">{{ currentQuestion.en || "Loading..." }}</h2>
-    <div class="grid grid-cols-2 gap-4" v-if="answerOptions.length">
+    <h2 class="text-4xl my-10 font-bold">{{ currentQuestion.en || "Loading..." }}</h2>
+    <div class="flex flex-col gap-2" v-if="answerOptions.length">
       <button
         v-for="(option, index) in answerOptions"
         :key="index"
         class="btn w-full"
-        :class="{ 'btn-error': isWrong(option), 'btn-success': isCorrect(option) }"
+        style="font-size: 2rem; line-height: 2.5rem;"
+        :class="{ 'btn-error ': isWrong(option), 'btn-success': isCorrect(option) }"
         @click="selectAnswer(option)"
       >
         {{ option }}
       </button>
     </div>
-    <p class="mt-4">Score: {{ score }}</p>
   </div>
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 
-const supabase = inject("supabase");
+import { supabase } from '../supabase'; // Import the Supabase client directly
+import { useUserStore } from '../store';
+const userStore = useUserStore();
+
 const score = ref(0);
 const vocabulary = ref([]);
 const currentQuestion = ref({});
@@ -62,8 +65,8 @@ const setNewQuestion = () => {
 
 const selectAnswer = (selected) => {
   if (selected === currentQuestion.value.ar) {
-    score.value += 1;
-    updateScore();
+    const newScore = userStore.userScore + 1;
+    userStore.updateScore(newScore); // Update both Supabase and store
     setNewQuestion();
   }
 };
@@ -74,45 +77,4 @@ const isCorrect = (option) =>
 const isWrong = (option) =>
   option !== currentQuestion.value.ar && option === selectedOption.value;
 
-// score handling
-
-const updateScore = async () => {
-  const shorthand = sessionStorage.getItem("user"); // Get the current user's shorthand ("MZ" or "KS")
-
-  if (!shorthand) {
-    console.error("No user shorthand found in sessionStorage.");
-    return;
-  }
-
-  // Fetch the current player by shorthand
-  const { data: playerData, error: fetchError } = await supabase
-    .from("players")
-    .select("id, score")
-    .eq("shorthand", shorthand)
-    .single();
-
-  if (fetchError) {
-    console.error("Error fetching player:", fetchError);
-    return;
-  }
-
-  if (!playerData) {
-    console.error("Player not found.");
-    return;
-  }
-
-  // Update the score for the current player
-  const newScore = playerData.score + 1; // Increase score by 1
-
-  const { error: updateError } = await supabase
-    .from("players")
-    .update({ score: newScore })
-    .eq("id", playerData.id);
-
-  if (updateError) {
-    console.error("Error updating score:", updateError);
-  } else {
-    console.log(`Score updated successfully for ${shorthand}. New score: ${newScore}`);
-  }
-};
 </script>

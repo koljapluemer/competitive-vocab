@@ -1,14 +1,14 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
-import { createClient } from '@supabase/supabase-js';
+import { createPinia } from 'pinia';
 
 // Import Tailwind CSS
 import './index.css';
 
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+const pinia = createPinia();
 
 const app = createApp(App);
-app.provide('supabase', supabase);
 app.use(router);
+app.use(pinia);
 app.mount('#app');
