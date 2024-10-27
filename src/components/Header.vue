@@ -21,6 +21,9 @@
       <button class="btn btn-sm">
         <router-link to="/home">Home</router-link>
       </button>
+      <button class="btn btn-sm" @click="copyGameStateToClipboard">
+        Share (clipboard)
+      </button>
     </nav>
   </header>
 
@@ -36,4 +39,19 @@
 import { useUserStore } from "../store";
 
 const userStore = useUserStore();
+
+const copyGameStateToClipboard = async () => {
+    try {
+      // copy the scores, and add trophy emoji for the winner
+      let gameStateText = `Competition State: \n\n${userStore.user}: ${userStore.userScore} ${
+        userStore.userScore > userStore.opponentScore ? "🏆" : ""
+      }\n${userStore.opponent}: ${userStore.opponentScore} ${
+        userStore.opponentScore > userStore.userScore ? "🏆" : ""
+      }`;
+
+      await navigator.clipboard.writeText(gameStateText);
+    } catch($e) {
+      alert('Cannot copy progress');
+    }
+  }
 </script>
