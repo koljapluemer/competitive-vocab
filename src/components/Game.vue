@@ -20,7 +20,7 @@
 import { ref, onMounted } from "vue";
 
 import { supabase } from '../supabase'; // Import the Supabase client directly
-import { useUserStore } from '../store';
+import { useUserStore } from '../stores/userStore';
 const userStore = useUserStore();
 
 const score = ref(0);

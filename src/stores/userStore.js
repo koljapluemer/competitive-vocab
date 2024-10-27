@@ -1,6 +1,6 @@
 // src/store.js
 import { defineStore } from 'pinia';
-import { supabase } from './supabase'; // Import the Supabase client directly
+import { supabase } from '../supabase'; // Import the Supabase client directly
 
 export const useUserStore = defineStore('user', {
   state: () => ({

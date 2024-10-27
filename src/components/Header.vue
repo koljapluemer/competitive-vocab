@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { useUserStore } from "../store";
+import { useUserStore } from "../stores/userStore";
 
 const userStore = useUserStore();
 
