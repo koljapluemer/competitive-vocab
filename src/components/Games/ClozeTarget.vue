@@ -37,9 +37,9 @@ const inputAnswer = ref("");
 const parts = ref([]); // Array to store parts of the word, including cloze input
 
 
-const loadNewWord = async () => {
+const loadNewWord =  () => {
   // Select a random word and create cloze deletion for `word_native`
-  const wordArr = await vocabStore.getWords(1);
+  const wordArr = vocabStore.getWords(1);
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
     createCloze();
@@ -76,7 +76,7 @@ const giveUp = () => {
 };
 
 // Initial load of vocabulary and first word
-onMounted(async () => {
+onMounted( () => {
   loadNewWord();
 });
 </script>

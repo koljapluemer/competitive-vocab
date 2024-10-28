@@ -31,14 +31,14 @@ const answerOptions = ref([]);
 const numberOfWrongClicks = ref(0);
 
 // Fetch the next due card when the component mounts
-onMounted(async () => {
-  await loadNewQuestion();
+onMounted( () => {
+  loadNewQuestion();
 });
 
 // Fetch and set the next due card as the current question
-const loadNewQuestion = async () => {
+const loadNewQuestion =  () => {
   console.log("Loading new question");
-  const wordsForPuzzle = await vocabStore.getWords(4); // returns 4!!! words, 1 to be used as the correct answer
+  const wordsForPuzzle = vocabStore.getWords(4); // returns 4!!! words, 1 to be used as the correct answer
   console.log("words for puzzle", wordsForPuzzle);
   currentQuestion.value = wordsForPuzzle[0];
   numberOfWrongClicks.value = 0;
@@ -49,19 +49,18 @@ const loadNewQuestion = async () => {
 };
 
 // Handle answer selection
-const selectAnswer = async (selected) => {
+const selectAnswer =  (selected) => {
   if (selected === currentQuestion.value.word_target) {
     const newScore = userStore.userScore + 3;
     userStore.updateScore(newScore); // Update score in Supabase and userStore
 
     // Register the correct answer with progressStore to update scheduling
-    vocabStore
-      .registerRepetition(
-        currentQuestion.word_native,
-        Math.max(0, 4 - numberOfWrongClicks.value),
-        4
-      )
-      .then(() => loadNewQuestion());
+    vocabStore.registerRepetition(
+      currentQuestion.word_native,
+      Math.max(0, 4 - numberOfWrongClicks.value),
+      4
+    );
+    loadNewQuestion();
 
     // Load the next question
   } else {

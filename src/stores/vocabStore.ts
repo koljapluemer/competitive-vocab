@@ -20,27 +20,22 @@ export const useVocabStore = defineStore("vocabStore", {
     localLearningData: {} as Record<string, any>,
   }),
   actions: {
-    async loadWordsFromSupabase() {
+    async loadWords() {
       const { data, error } = await supabase
         .from("words")
         .select("word_native, word_target");
       if (error) {
         console.error("Error loading vocabulary from Supabase:", error);
-        return;
       }
       this.words = data || [];
-      console.log("Vocabulary loaded:", this.words);
-
       const localLearningData = localStorage.getItem("localLearningData");
       if (localLearningData) {
         this.localLearningData = JSON.parse(localLearningData);
         console.log("Local learning data loaded:", this.localLearningData);
       }
     },
-    async getWords(n: number) {
-      if (this.words.length === 0) {
-        await this.loadWordsFromSupabase();
-      }
+
+    getWords(n: number) {
       //   first, get all cards that are actually due, sorted by nextDue (first due first in list)
       // words[] is the authorative list, and localLearningData is used to check whether learning data exist per word
       //   therefor, ONLYYY words in words[] are considered
@@ -62,7 +57,12 @@ export const useVocabStore = defineStore("vocabStore", {
         return new Date(cardA.due) - new Date(cardB.due);
       });
       console.log("Due cards sorted: ", dueCardsSorted);
-      console.log("first element", dueCardsSorted[0].word_native,  "due at: ", this.localLearningData[dueCardsSorted[0].word_native].due);
+      console.log(
+        "first element",
+        dueCardsSorted[0].word_native,
+        "due at: ",
+        this.localLearningData[dueCardsSorted[0].word_native].due
+      );
       //   make another array:
       // this one should contain two types of words
       // those that are not due, and those that are not yet in localLearningData
@@ -102,11 +102,7 @@ export const useVocabStore = defineStore("vocabStore", {
       return combined.slice(0, n);
     },
 
-    async registerRepetition(
-      wordNative: string,
-      rating: number,
-      max_rating: number
-    ) {
+    registerRepetition(wordNative: string, rating: number, max_rating: number) {
       // if word is not saved in localstorage, ignore actual rating and just save it
       if (!this.localLearningData[wordNative]) {
         console.info("New card registered: ", wordNative);

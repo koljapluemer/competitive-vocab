@@ -28,8 +28,8 @@ const currentWord = ref<{ id: string; word_native: string; word_target: string }
 const isRevealed = ref(false);
 
 // Load a new card based on spaced repetition scheduling
-const loadNewCard = async () => {
-  const wordArr = await vocabStore.getWords(1);
+const loadNewCard = () => {
+  const wordArr = vocabStore.getWords(1);
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
     isRevealed.value = false; // Reset reveal status for each new word
@@ -55,7 +55,7 @@ const rateCard = (ratingString) => {
 };
 
 // Load vocabulary and progress on mount
-onMounted(async () => {
+onMounted(() => {
   loadNewCard(); // Start with the first scheduled card
 });
 </script>
