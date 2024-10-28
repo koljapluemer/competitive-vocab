@@ -22,27 +22,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useUserStore } from "../stores/userStore";
 
-import { supabase } from "../supabase"; // Import the Supabase client directly
+import { ref, onMounted } from "vue";
+import { useVocabStore } from "../../stores/vocabStore";
+import { useUserStore } from "../../stores/userStore";
 
 const userStore = useUserStore();
+const vocabStore = useVocabStore();
+
 const score = ref(userStore.userScore);
-const vocabulary = ref([]);
+
 const currentWord = ref({});
 const inputAnswer = ref("");
 const parts = ref([]); // Array to store parts of the word, including cloze input
 
-const loadVocabulary = async () => {
-  const { data, error } = await supabase.from("words").select("word_native, word_target");
-  if (!error && data) vocabulary.value = data;
-};
 
-const loadNewWord = () => {
+const loadNewWord = async () => {
   // Select a random word and create cloze deletion for `word_native`
-  currentWord.value =
-    vocabulary.value[Math.floor(Math.random() * vocabulary.value.length)];
+  currentWord.value = await vocabStore.getOneWord();
   createCloze();
 };
 
@@ -77,7 +74,6 @@ const giveUp = () => {
 
 // Initial load of vocabulary and first word
 onMounted(async () => {
-  await loadVocabulary();
   loadNewWord();
 });
 </script>
