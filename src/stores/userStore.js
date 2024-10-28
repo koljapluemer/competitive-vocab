@@ -12,6 +12,7 @@ export const useUserStore = defineStore('user', {
   actions: {
     setUser(shorthand) {
       this.user = shorthand;
+      localStorage.setItem('user', shorthand);
       if (shorthand == 'MZ') {
         this.opponent = 'KS';
         } else {

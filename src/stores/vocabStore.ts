@@ -46,6 +46,7 @@ export const useVocabStore = defineStore("vocabStore", {
       //   therefor, ONLYYY words in words[] are considered
       // relevant prop is simply called "due" and has format due:"2024-11-12T14:29:29.441Z"
       const now = new Date();
+      // TODO: this seems to wrongly include cards that are not yet due, b/c they were just done?!
       const dueCards = this.words.filter((word) => {
         const card = this.localLearningData[word.word_native];
         if (!card) {
@@ -54,6 +55,7 @@ export const useVocabStore = defineStore("vocabStore", {
         const dueAsDate = new Date(card.due);
         return dueAsDate < now;
       });
+
       const dueCardsSorted = dueCards.sort((a, b) => {
         const cardA = this.localLearningData[a.word_native];
         const cardB = this.localLearningData[b.word_native];
@@ -142,6 +144,8 @@ export const useVocabStore = defineStore("vocabStore", {
             console.error("Rating out of range: ", mappedRatingRounded);
             return;
         }
+
+        console.log("New card data: ", card);
 
         // update localstorage/state
         this.localLearningData[wordNative] = card;

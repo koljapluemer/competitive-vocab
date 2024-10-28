@@ -6,10 +6,15 @@
 <script setup>
 import Header from './components/Header.vue';
 import { ref, onMounted } from 'vue';
+import { useUserStore } from "./stores/userStore";
 
-const user = ref(sessionStorage.getItem('user')); // Check if user is authenticated
+const userStore = useUserStore();
 
-onMounted(() => {
-  user.value = sessionStorage.getItem('user'); // Refresh user state on mount
+onMounted(async () => {
+  const savedUser = localStorage.getItem('user');
+  if (savedUser) {
+    userStore.setUser(savedUser);
+    await userStore.fetchScores();
+  }
 });
 </script>
