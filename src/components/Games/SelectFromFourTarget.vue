@@ -51,12 +51,13 @@ const loadNewQuestion =  () => {
 // Handle answer selection
 const selectAnswer =  (selected) => {
   if (selected === currentQuestion.value.word_target) {
+
     const newScore = userStore.userScore + 3;
     userStore.updateScore(newScore); // Update score in Supabase and userStore
 
     // Register the correct answer with progressStore to update scheduling
     vocabStore.registerRepetition(
-      currentQuestion.word_native,
+      currentQuestion.value.word_native,
       Math.max(0, 4 - numberOfWrongClicks.value),
       4
     );

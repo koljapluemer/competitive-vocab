@@ -42,6 +42,7 @@ export const useVocabStore = defineStore("vocabStore", {
       // relevant prop is simply called "due" and has format due:"2024-11-12T14:29:29.441Z"
       const now = new Date();
       // TODO: this seems to wrongly include cards that are not yet due, b/c they were just done?!
+      console.log("learning data used for due cards: ", this.localLearningData);
       const dueCards = this.words.filter((word) => {
         const card = this.localLearningData[word.word_native];
         if (!card) {
@@ -54,13 +55,13 @@ export const useVocabStore = defineStore("vocabStore", {
       const dueCardsSorted = dueCards.sort((a, b) => {
         const cardA = this.localLearningData[a.word_native];
         const cardB = this.localLearningData[b.word_native];
-        return new Date(cardA.due) - new Date(cardB.due);
+        return !(new Date(cardA.due) - new Date(cardB.due));
       });
       console.log("Due cards sorted: ", dueCardsSorted);
       console.log(
-        "first element",
+        "first element '",
         dueCardsSorted[0].word_native,
-        "due at: ",
+        "' due at: ",
         this.localLearningData[dueCardsSorted[0].word_native].due
       );
       //   make another array:
@@ -103,6 +104,7 @@ export const useVocabStore = defineStore("vocabStore", {
     },
 
     registerRepetition(wordNative: string, rating: number, max_rating: number) {
+      console.log("Registering repetition for: ", wordNative);
       // if word is not saved in localstorage, ignore actual rating and just save it
       if (!this.localLearningData[wordNative]) {
         console.info("New card registered: ", wordNative);
@@ -141,11 +143,13 @@ export const useVocabStore = defineStore("vocabStore", {
             console.error("Rating out of range: ", mappedRatingRounded);
             return;
         }
-
+        console.log(wordNative)
         console.log("New card data: ", card);
 
         // update localstorage/state
+        // TODO: this state update here doesn't seem to work?!
         this.localLearningData[wordNative] = card;
+        console.log("Local learning data updated: ", this.localLearningData);
         localStorage.setItem(
           "localLearningData",
           JSON.stringify(this.localLearningData)

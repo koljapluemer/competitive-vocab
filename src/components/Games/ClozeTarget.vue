@@ -22,7 +22,6 @@
 </template>
 
 <script setup>
-
 import { ref, onMounted } from "vue";
 import { useVocabStore } from "../../stores/vocabStore";
 import { useUserStore } from "../../stores/userStore";
@@ -36,8 +35,7 @@ const currentWord = ref({});
 const inputAnswer = ref("");
 const parts = ref([]); // Array to store parts of the word, including cloze input
 
-
-const loadNewWord =  () => {
+const loadNewWord = () => {
   // Select a random word and create cloze deletion for `word_native`
   const wordArr = vocabStore.getWords(1);
   if (wordArr.length > 0) {
@@ -65,6 +63,8 @@ const checkAnswer = () => {
   if (inputAnswer.value === parts.value.find((part) => part.type === "input").value) {
     score.value += 5;
     userStore.updateScore(score.value); // Update score in global store and Supabase
+    // Register the correct answer with progressStore to update scheduling
+    vocabStore.registerRepetition(currentWord.value.word_native, 2, 3);
     loadNewWord(); // Load the next word if answer is correct
   }
 };
@@ -72,11 +72,12 @@ const checkAnswer = () => {
 const giveUp = () => {
   score.value -= 1;
   userStore.updateScore(score.value); // Update score
+  vocabStore.registerRepetition(currentWord.value.word_native, 1, 3);
   loadNewWord(); // Load a new word
 };
 
 // Initial load of vocabulary and first word
-onMounted( () => {
+onMounted(() => {
   loadNewWord();
 });
 </script>
