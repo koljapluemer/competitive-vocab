@@ -62,6 +62,7 @@ export const useVocabStore = defineStore("vocabStore", {
         return new Date(cardA.due) - new Date(cardB.due);
       });
       console.log("Due cards sorted: ", dueCardsSorted);
+      console.log("first element", dueCardsSorted[0].word_native,  "due at: ", this.localLearningData[dueCardsSorted[0].word_native].due);
       //   make another array:
       // this one should contain two types of words
       // those that are not due, and those that are not yet in localLearningData
