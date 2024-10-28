@@ -39,8 +39,11 @@ const parts = ref([]); // Array to store parts of the word, including cloze inpu
 
 const loadNewWord = async () => {
   // Select a random word and create cloze deletion for `word_native`
-  currentWord.value = await vocabStore.getOneWord();
-  createCloze();
+  const wordArr = await vocabStore.getWords(1);
+  if (wordArr.length > 0) {
+    currentWord.value = wordArr[0];
+    createCloze();
+  }
 };
 
 const createCloze = () => {

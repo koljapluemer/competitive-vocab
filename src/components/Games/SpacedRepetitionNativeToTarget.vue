@@ -12,7 +12,6 @@
       <button class="btn btn-secondary" @click="rateCard('good')">Good</button>
       <button class="btn btn-secondary" @click="rateCard('easy')">Easy</button>
     </div>
-
   </div>
 </template>
 
@@ -30,8 +29,9 @@ const isRevealed = ref(false);
 
 // Load a new card based on spaced repetition scheduling
 const loadNewCard = async () => {
-  currentWord.value = await vocabStore.getOneWord();
-  if (currentWord.value) {
+  const wordArr = await vocabStore.getWords(1);
+  if (wordArr.length > 0) {
+    currentWord.value = wordArr[0];
     isRevealed.value = false; // Reset reveal status for each new word
   }
 };

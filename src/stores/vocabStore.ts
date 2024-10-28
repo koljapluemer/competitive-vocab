@@ -37,17 +37,66 @@ export const useVocabStore = defineStore("vocabStore", {
         console.log("Local learning data loaded:", this.localLearningData);
       }
     },
-    async getOneWord() {
-      if (this.words.length === 0) {
-        await this.loadWordsFromSupabase();
-      }
-      return this.words[Math.floor(Math.random() * this.words.length)];
-    },
     async getWords(n: number) {
       if (this.words.length === 0) {
         await this.loadWordsFromSupabase();
       }
-      return this.words.sort(() => Math.random() - 0.5).slice(0, n);
+      //   first, get all cards that are actually due, sorted by nextDue (first due first in list)
+      // words[] is the authorative list, and localLearningData is used to check whether learning data exist per word
+      //   therefor, ONLYYY words in words[] are considered
+      // relevant prop is simply called "due" and has format due:"2024-11-12T14:29:29.441Z"
+      const now = new Date();
+      const dueCards = this.words.filter((word) => {
+        const card = this.localLearningData[word.word_native];
+        if (!card) {
+          return false;
+        }
+        const dueAsDate = new Date(card.due);
+        return dueAsDate < now;
+      });
+      const dueCardsSorted = dueCards.sort((a, b) => {
+        const cardA = this.localLearningData[a.word_native];
+        const cardB = this.localLearningData[b.word_native];
+        return new Date(cardA.due) - new Date(cardB.due);
+      });
+      console.log("Due cards sorted: ", dueCardsSorted);
+      //   make another array:
+      // this one should contain two types of words
+      // those that are not due, and those that are not yet in localLearningData
+      // new ones (not yet in data) should come first, then the not due ones, sorted by due (which IS NOT CALLED 'nextDue' BUT JUST 'due')
+
+      const newCards = this.words.filter((word) => {
+        const card = this.localLearningData[word.word_native];
+        if (!card) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      const notDueCards = this.words.filter((word) => {
+        const card = this.localLearningData[word.word_native];
+        if (!card) {
+          return false;
+        }
+        const dueAsDate = new Date(card.due);
+        return dueAsDate >= now;
+      });
+      const notDueCardsSortedByDue = notDueCards.sort((a, b) => {
+        const cardA = this.localLearningData[a.word_native];
+        const cardB = this.localLearningData[b.word_native];
+        return new Date(cardA.due) - new Date(cardB.due);
+      });
+
+      // make one combined array: dueCardsSorted + newCards + notDueCardsSortedByDue
+      // return the first n elements of this array
+      const combined = [
+        ...dueCardsSorted,
+        ...newCards,
+        ...notDueCardsSortedByDue,
+      ];
+      console.log("Combined array: ", combined);
+      return combined.slice(0, n);
     },
 
     async registerRepetition(
