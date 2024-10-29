@@ -8,6 +8,7 @@ import SpacedRepetitionNativeToTarget from './components/Games/SpacedRepetitionN
 import SpacedRepetitionTargetToNative from './components/Games/SpacedRepetitionTargetToNative.vue';
 import SpacedRepetitionMixed from './components/Games/SpacedRepetitionMixed.vue';
 import ClozeTarget from './components/Games/ClozeTarget.vue';
+import MissingLetterTarget from './components/Games/MissingLetterTarget.vue';
 
 const pinia = createPinia(); // Create a Pinia instance
 
@@ -19,6 +20,7 @@ const routes = [
   { path: '/game-sr', component: SpacedRepetitionNativeToTarget },
   { path: '/game-sr-target', component: SpacedRepetitionTargetToNative },
   { path: '/game-sr-mixed', component: SpacedRepetitionMixed },
+  { path: '/game-missing-letter', component: MissingLetterTarget },
 ];
 
 const router = createRouter({
