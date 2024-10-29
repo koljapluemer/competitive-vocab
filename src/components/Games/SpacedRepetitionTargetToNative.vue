@@ -1,10 +1,9 @@
 <template>
   <div class="text-center" v-if="currentWord">
-    <h2 class="text-2xl mb-4 font-bold border-b-2 pb-4">{{ currentWord.word_native }}</h2>
+    <h2 class="text-2xl mb-4 font-bold border-b-2 pb-4">{{ currentWord.word_target }}</h2>
     <h2 class="text-2xl mb-4 font-bold pb-4" v-if="isRevealed">
-      {{ currentWord.word_target }}
+      {{ currentWord.word_native }}
     </h2>
-
     <button v-if="!isRevealed" class="btn btn-primary" @click="revealCard">Reveal</button>
 
     <div v-else class="flex justify-center space-x-2 mt-4">
