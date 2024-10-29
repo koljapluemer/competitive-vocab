@@ -12,7 +12,8 @@
     <button class="btn w-full mb-2" @click="$router.push('/game-sr')">Spaced Repetition</button>
 
 
-    <h3 class="text-xl mt-10 mb-2">mixed</h3>
+    <h3 class="text-xl mt-10 mb-2">↔</h3>
+    <button class="btn w-full mb-2" @click="$router.push('/game-sr-mixed')">Spaced Repetition</button>
 
 
   </div>

@@ -6,6 +6,7 @@ import Home from './components/Home.vue';
 import SelectFromFourTarget from './components/Games/SelectFromFourTarget.vue';
 import SpacedRepetitionNativeToTarget from './components/Games/SpacedRepetitionNativeToTarget.vue';
 import SpacedRepetitionTargetToNative from './components/Games/SpacedRepetitionTargetToNative.vue';
+import SpacedRepetitionMixed from './components/Games/SpacedRepetitionMixed.vue';
 import ClozeTarget from './components/Games/ClozeTarget.vue';
 
 const pinia = createPinia(); // Create a Pinia instance
@@ -17,6 +18,7 @@ const routes = [
   { path: '/game-cloze', component: ClozeTarget }, // New cloze deletion game mode
   { path: '/game-sr', component: SpacedRepetitionNativeToTarget },
   { path: '/game-sr-target', component: SpacedRepetitionTargetToNative },
+  { path: '/game-sr-mixed', component: SpacedRepetitionMixed },
 ];
 
 const router = createRouter({
