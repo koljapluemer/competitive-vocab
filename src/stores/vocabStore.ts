@@ -94,6 +94,17 @@ export const useVocabStore = defineStore("vocabStore", {
       return combined.slice(0, n);
     },
 
+    getPreviouslyUnseenWords(n: number) {
+      // get all words that are not yet in localLearningData
+      let newWords = this.words.filter((word) => {
+        return !this.localLearningData[word.word_native];
+      });
+      console.log(`New words: ${newWords.length}`);
+      newWords = newWords.sort(() => Math.random() - 0.5);
+
+      return newWords.slice(0, n);
+    },
+
     registerRepetition(wordNative: string, rating: number, max_rating: number) {
       // if word is not saved in localstorage, ignore actual rating and just save it
       if (!this.localLearningData[wordNative]) {
