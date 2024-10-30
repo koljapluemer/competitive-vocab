@@ -9,7 +9,7 @@
         v-for="(option, index) in answerOptions"
         :key="index"
         class="btn w-full"
-        style="font-size: 2rem; line-height: 2.5rem"
+        style="font-size: 2rem; line-height: 2.5rem; height: inherit;"
         @click="selectAnswer(option)"
       >
         {{ option }}
