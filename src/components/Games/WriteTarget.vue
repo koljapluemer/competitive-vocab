@@ -1,18 +1,24 @@
 <template>
   <div class="flex flex-col" v-if="currentWord">
     <h2 class="text-2xl mb-4 font-bold text-center">{{ currentWord.word_native }}</h2>
-    <!-- {{ currentWord.word_target_short }} -->
+   <h2 class="text-2xl my-4 text-center">
+    {{ hintString }}
+   </h2>
+
     <input
-      class="input input-bordered bg-base-200"
+      class="input input-bordered bg-base-200 input-lg text-4xl input-primary"
       v-model="inputAnswer"
       @input="checkAnswer"
     />
+
     <small class="">Diacritics are optional.</small>
 
     <!-- :style="{ width: `${currentWord.word_target_short.length * 1.3}em` }" -->
 
-    <button class="btn btn-secondary ml-2 mt-10" @click="giveUp">Give Up (-1)</button>
-
+    <div class="flex flex-col gap-2 mt-10">
+      <button class="btn btn-sm" @click="revealLetter">Reveal 1 Letter</button>
+      <button class="btn btn-sm" @click="giveUp">Give Up (-1)</button>
+    </div>
   </div>
 </template>
 
@@ -30,19 +36,23 @@ const score = ref(userStore.userScore);
 
 const currentWord = ref({});
 const inputAnswer = ref("");
+const hintString = ref("");
 
 const loadNewWord = () => {
   // Select a random word and create cloze deletion for `word_native`
   const wordArr = vocabStore.getWords(1, true);
-  console.log("got words", wordArr);
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
     inputAnswer.value = "";
+    hintString.value =  "٭".repeat(normalizeArabicText(currentWord.value.word_target_short).length);
   }
 };
 
 const checkAnswer = () => {
-  if (normalizeArabicText(inputAnswer.value) === normalizeArabicText(currentWord.value.word_target_short)) {
+  if (
+    normalizeArabicText(inputAnswer.value) ===
+    normalizeArabicText(currentWord.value.word_target_short)
+  ) {
     score.value += 5;
     userStore.updateScore(score.value); // Update score in global store and Supabase
     // Register the correct answer with progressStore to update scheduling
@@ -74,6 +84,25 @@ const logDataInSupabase = async (score, max_score) => {
   ]);
   if (error) {
     console.error("Error logging data in Supabase", error);
+  }
+};
+
+const revealLetter = () => {
+  // as long is there is at least one ٭ in hintString
+  // choose a random index (keep guessing until hitting *)
+  // and replace it with the correct letter
+
+  const hintArr = hintString.value.split("");
+  const targetArr = normalizeArabicText(currentWord.value.word_target_short).split("");
+
+  if (hintArr.includes("٭")) {
+    let randomIndex = Math.floor(Math.random() * hintArr.length);
+    while (hintArr[randomIndex] !== "٭") {
+      randomIndex = Math.floor(Math.random() * hintArr.length);
+    }
+
+    hintArr[randomIndex] = targetArr[randomIndex];
+    hintString.value = hintArr.join("");
   }
 };
 
