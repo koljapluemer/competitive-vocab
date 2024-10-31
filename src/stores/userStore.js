@@ -6,6 +6,7 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     user: null,
     userScore: 0,
+    money: null,
     opponent: null,
     opponentScore: 0,
     currentContestId: null,
@@ -94,6 +95,22 @@ export const useUserStore = defineStore('user', {
         console.log('user score: ', this.userScore);
 
       }
+
+      // get money from table "players", match this.user with "shorthand" prop
+      const { data: playerData, error: playerError } = await supabase
+        .from('players')
+        .select()
+        .eq('shorthand', this.user);
+
+      if (playerError) {
+        console.error("Error fetching player:", playerError);
+      }
+
+      if (playerData && playerData.length > 0) {
+        this.money = playerData[0].money;
+        console.log('money: ', this.money);
+      }
+
     },
 
     async createNewContest() {
