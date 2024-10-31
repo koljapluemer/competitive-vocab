@@ -10,6 +10,7 @@ import SpacedRepetitionMixed from './components/Games/SpacedRepetitionMixed.vue'
 import ClozeTarget from './components/Games/ClozeTarget.vue';
 import MissingLetterTarget from './components/Games/MissingLetterTarget.vue';
 import SeeNew from './components/Games/SeeNew.vue';
+import WriteTarget from './components/Games/WriteTarget.vue';
 
 const pinia = createPinia(); // Create a Pinia instance
 
@@ -23,6 +24,7 @@ const routes = [
   { path: '/game-sr-mixed', component: SpacedRepetitionMixed },
   { path: '/game-missing-letter', component: MissingLetterTarget },
   { path: '/game-new', component: SeeNew },
+  { path: '/game-write-target', component: WriteTarget },
 ];
 
 const router = createRouter({
