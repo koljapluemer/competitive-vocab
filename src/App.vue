@@ -1,7 +1,7 @@
 <template>
   <Header/> <!-- Show Header if user is authenticated -->
-  <router-view v-if="wordsLoaded"/>
-  <div class="" v-else>...</div>
+  <router-view v-if="wordsLoaded" class=" m-auto max-w-md px-2"/>
+  <div class=" m-auto max-w-md px-2" v-else>...</div>
 </template>
 
 <script setup>

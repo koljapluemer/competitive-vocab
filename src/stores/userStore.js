@@ -9,6 +9,7 @@ export const useUserStore = defineStore('user', {
     opponent: null,
     opponentScore: 0,
     currentContestId: null,
+    contestEndTime: null
   }),
   actions: {
     setUser(shorthand) {
@@ -79,6 +80,7 @@ export const useUserStore = defineStore('user', {
         await this.createNewContest();
       } else {
         this.currentContestId = contestData[0].id;
+        this.contestEndTime = contestData[0].end_time;
 
         if (this.user === 'MZ') {
           this.userScore = contestData[0].mz_score;
