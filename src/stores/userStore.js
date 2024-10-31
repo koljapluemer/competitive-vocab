@@ -53,6 +53,41 @@ export const useUserStore = defineStore('user', {
 
     },
 
+    requestBuyingSomething(price) {
+      if (!this.user) return;
+
+      if (this.money < price) {
+        return false;
+      }
+
+      this.money -= price;
+      this.updateMoney(this.money);
+
+      return true;
+    },
+
+    async updateMoney(newMoney) {
+      if (!this.user) return;
+
+      const { error: updateError } = await supabase
+        .from('players')
+        .update({ money: newMoney })
+        .eq('shorthand', this.user);
+
+      if (updateError) {
+        console.error("Error updating money:", updateError);
+      } else {
+        this.money = newMoney;
+      }
+    },
+
+    addMoney(amount) {
+      if (!this.user) return;
+
+      this.money += amount;
+      this.updateMoney(this.money);
+    },
+
     async fetchCurrentContest() {
       if (!this.user) return;
 

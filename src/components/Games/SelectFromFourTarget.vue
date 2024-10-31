@@ -64,6 +64,7 @@ const selectAnswer = (selected) => {
       registeredScore,
       4
     );
+    userStore.addMoney(1);
     logDataInSupabase(registeredScore, 4);
 
     loadNewQuestion();

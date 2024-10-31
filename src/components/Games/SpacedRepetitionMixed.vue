@@ -50,6 +50,7 @@ const rateCard = (ratingString) => {
   if (!currentWord.value) return;
   const newScore = userStore.userScore + 1;
   userStore.updateScore(newScore); // Update score in Supabase and userStore
+  userStore.addMoney(1);
   const rating = {
     again: 0,
     hard: 1,
@@ -63,15 +64,6 @@ const rateCard = (ratingString) => {
 
 const logDataInSupabase = async (score, max_score) => {
   // Log the current score in Supabase
-  // use table: learn_log
-  // with following properties:
-  // word_id = currentWord.value.word_native
-  // displayed_front = reversedQuestion ? currentWord.word_target : currentWord.word_native
-  // displayed_back = reversedQuestion ? currentWord.word_native : currentWord.word_target }}
-  // score
-  // max_score
-  // game_mode = "SpacedRepetitionMixed"
-
 
   const { data, error } = await supabase.from("learn_log").insert([
     {

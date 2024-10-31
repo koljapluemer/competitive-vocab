@@ -45,6 +45,8 @@ const revealCard = () => {
 const rateCard = (ratingString) => {
   if (!currentWord.value) return;
   const newScore = userStore.userScore + 1;
+  userStore.addMoney(1);
+
   userStore.updateScore(newScore); // Update score in Supabase and userStore
   const rating = {
     again: 0,

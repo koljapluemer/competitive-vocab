@@ -105,6 +105,8 @@ const checkAnswer = (selected) => {
       score,
       4
     );
+    userStore.addMoney(1);
+
     logDataInSupabase(score, 4);
     loadNewWord();
 

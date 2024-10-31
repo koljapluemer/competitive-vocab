@@ -68,6 +68,7 @@ const checkAnswer = () => {
     // Register the correct answer with progressStore to update scheduling
     vocabStore.registerRepetition(currentWord.value.word_native, 2, 3);
     logDataInSupabase(2, 3);
+    userStore.addMoney(1);
     loadNewWord(); // Load the next word if answer is correct
   }
 };

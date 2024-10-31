@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col" v-if="currentWord">
     <h2 class="text-2xl mb-4 font-bold text-center">{{ currentWord.word_native }}</h2>
-   <h2 class="text-2xl my-4 text-center">
-    {{ hintString }}
-   </h2>
+    <h2 class="text-2xl my-4 text-center">
+      {{ hintString }}
+    </h2>
 
     <input
       class="input input-bordered bg-base-200 input-lg text-4xl input-primary"
@@ -44,7 +44,9 @@ const loadNewWord = () => {
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
     inputAnswer.value = "";
-    hintString.value =  "٭".repeat(normalizeArabicText(currentWord.value.word_target_short).length);
+    hintString.value = "٭".repeat(
+      normalizeArabicText(currentWord.value.word_target_short).length
+    );
   }
 };
 
@@ -58,6 +60,8 @@ const checkAnswer = () => {
     // Register the correct answer with progressStore to update scheduling
     vocabStore.registerRepetition(currentWord.value.word_native, 2, 3);
     logDataInSupabase(2, 3);
+    userStore.addMoney(1);
+
     loadNewWord(); // Load the next word if answer is correct
   }
 };
@@ -91,6 +95,10 @@ const revealLetter = () => {
   // as long is there is at least one ٭ in hintString
   // choose a random index (keep guessing until hitting *)
   // and replace it with the correct letter
+
+  if (!userStore.requestBuyingSomething(1)) {
+    return;
+  }
 
   const hintArr = hintString.value.split("");
   const targetArr = normalizeArabicText(currentWord.value.word_target_short).split("");
