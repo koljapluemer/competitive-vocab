@@ -35,11 +35,9 @@ export const useUserStore = defineStore('user', {
         if (updateError) {
           console.error("Error updating user score:", updateError);
         } else {
-          console.log('updated user score to: ', newScore);
           this.userScore = newScore;
         }
       } else {
-        console.log(this.currentContestId, newScore);
         const { error: updateError } = await supabase
           .from('contests')
           .update({ ks_score: newScore })
@@ -48,7 +46,6 @@ export const useUserStore = defineStore('user', {
         if (updateError) {
           console.error("Error updating user score:", updateError);
         } else {
-          console.log('updated user score to: ', newScore);
           this.userScore = newScore;
         }
       }
@@ -74,8 +71,6 @@ export const useUserStore = defineStore('user', {
         console.error("Error fetching contest:", contestError);
       }
 
-      console.log('contest data: ', contestData);
-
 
       if (!contestData || contestData.length === 0) {
         await this.createNewContest();
@@ -92,7 +87,6 @@ export const useUserStore = defineStore('user', {
           this.opponentScore = contestData[0].mz_score;
         }
 
-        console.log('user score: ', this.userScore);
 
       }
 
@@ -108,13 +102,11 @@ export const useUserStore = defineStore('user', {
 
       if (playerData && playerData.length > 0) {
         this.money = playerData[0].money;
-        console.log('money: ', this.money);
       }
 
     },
 
     async createNewContest() {
-      console.log('no contest running, creating one');
       const nextSunday = new Date();
       nextSunday.setDate(nextSunday.getDate() + (7 - nextSunday.getDay()));
       nextSunday.setHours(9, 59, 0, 0);

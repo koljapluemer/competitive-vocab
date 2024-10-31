@@ -23,7 +23,7 @@ export const useVocabStore = defineStore("vocabStore", {
     async loadWords() {
       const { data, error } = await supabase
         .from("words")
-        .select("word_native, word_target");
+        .select();
       if (error) {
         console.error("Error loading vocabulary from Supabase:", error);
       }
@@ -35,13 +35,26 @@ export const useVocabStore = defineStore("vocabStore", {
       }
     },
 
-    getWords(n: number) {
+    getWords(n: number, ignoreWordsWithoutTargetShort = false) {
       //   first, get all cards that are actually due, sorted by nextDue (first due first in list)
       // words[] is the authorative list, and localLearningData is used to check whether learning data exist per word
       //   therefor, ONLYYY words in words[] are considered
       // relevant prop is simply called "due" and has format due:"2024-11-12T14:29:29.441Z"
+      let relevantWords = this.words;
+
+      console.log("Words in store: ", relevantWords.length);
+
+      if (ignoreWordsWithoutTargetShort) {
+        // check for property word_target_short
+        relevantWords = relevantWords.filter((word) => {
+          return word.word_target_short;
+        });
+      }
+
+      console.log("Words with target short: ", relevantWords.length);
+
       const now = new Date();
-      const dueCards = this.words.filter((word) => {
+      const dueCards = relevantWords.filter((word) => {
         const card = this.localLearningData[word.word_native];
         if (!card) {
           return false;
@@ -61,7 +74,7 @@ export const useVocabStore = defineStore("vocabStore", {
       // those that are not due, and those that are not yet in localLearningData
       // new ones (not yet in data) should come first, then the not due ones, sorted by due (which IS NOT CALLED 'nextDue' BUT JUST 'due')
 
-      const newCards = this.words.filter((word) => {
+      const newCards = relevantWords.filter((word) => {
         const card = this.localLearningData[word.word_native];
         if (!card) {
           return true;
@@ -70,7 +83,7 @@ export const useVocabStore = defineStore("vocabStore", {
         }
       });
 
-      const notDueCards = this.words.filter((word) => {
+      const notDueCards = relevantWords.filter((word) => {
         const card = this.localLearningData[word.word_native];
         if (!card) {
           return false;

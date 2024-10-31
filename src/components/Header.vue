@@ -136,7 +136,6 @@ const copyGameStateToClipboard = async () => {
 const getRemainingTimeInContestInHumanReadable = () => {
   // contest endtime is format 2024-11-03T08:59:00
   const remainingTime = new Date(userStore.contestEndTime) - new Date();
-  console.log(userStore.contestEndTime, "time", remainingTime);
   // get in days, hours, minutes
   const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
   const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
