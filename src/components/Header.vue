@@ -18,10 +18,6 @@
             v-else-if="userStore.userScore > userStore.opponentScore"
             >You're currently ahead</small
           >
-
-          <small class="text-center">
-            {{ getRemainingTimeInContestInHumanReadable() }} left
-          </small>
         </div>
       </div>
 
@@ -30,7 +26,47 @@
       </div>
     </nav>
 
-    <nav class="flex flew-row gap-2 mt-5 justify-center">
+    <nav class="rounded justify-center flex flex-row my-4 gap-4">
+      <div class="flex flex-row items-center gap-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+          />
+        </svg>
+
+        <small> {{ getRemainingTimeInContestInHumanReadable() }} left </small>
+      </div>
+      <div class="flex flex-row items-center gap-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M14.121 7.629A3 3 0 0 0 9.017 9.43c-.023.212-.002.425.028.636l.506 3.541a4.5 4.5 0 0 1-.43 2.65L9 16.5l1.539-.513a2.25 2.25 0 0 1 1.422 0l.655.218a2.25 2.25 0 0 0 1.718-.122L15 15.75M8.25 12H12m9 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+          />
+        </svg>
+        <small>
+          {{ userStore.money }}
+        </small>
+      </div>
+    </nav>
+
+    <nav class="flex flew-row gap-2 my-2 justify-center">
       <button class="btn btn-square btn-outline">
         <router-link to="/home">
           <svg
