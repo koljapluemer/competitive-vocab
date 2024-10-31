@@ -5,8 +5,7 @@
       {{ currentWord.word_target }}
     </h2>
 
-
-      <button class="btn btn-secondary" @click="showNextCard()">Got It</button>
+    <button class="btn btn-secondary" @click="showNextCard()">Got It</button>
   </div>
 </template>
 
@@ -14,6 +13,7 @@
 import { ref, onMounted } from "vue";
 import { useUserStore } from "../../stores/userStore";
 import { useVocabStore } from "../../stores/vocabStore";
+import { supabase } from "../../supabase";
 
 const vocabStore = useVocabStore();
 const userStore = useUserStore();
@@ -40,7 +40,35 @@ const showNextCard = () => {
   const newScore = userStore.userScore + 1;
   userStore.updateScore(newScore); // Update score in Supabase and userStore
   vocabStore.registerRepetition(currentWord.value.word_native, 0, 0);
+  logDataInSupabase(0, 0);
   loadNewCard();
+};
+
+const logDataInSupabase = async (score, max_score) => {
+  // Log the current score in Supabase
+  // use table: learn_log
+  // with following properties:
+  // word_id = currentWord.value.word_native
+  // displayed_front = currentWord.word_native
+  // displayed_back = currentWord.word_target
+  // score = -1
+  // max_score = -1
+  // game_mode = "SeeNew"
+
+  const { data, error } = await supabase.from("learn_log").insert([
+    {
+      word_id: currentWord.value.word_native,
+      displayed_front: currentWord.value.word_native,
+      displayed_back: currentWord.value.word_target,
+      score: -1,
+      max_score: -1,
+      game_mode: "SeeNew",
+      player_short: userStore.user,
+    },
+  ]);
+  if (error) {
+    console.error("Error logging data in Supabase", error);
+  }
 };
 
 // Load vocabulary and progress on mount

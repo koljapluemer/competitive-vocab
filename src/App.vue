@@ -18,8 +18,10 @@ onMounted(async () => {
   const savedUser = localStorage.getItem('user');
   if (savedUser) {
     userStore.setUser(savedUser);
-    await userStore.fetchScores();
+    await userStore.fetchCurrentContest();
   }
+
+  await userStore.fetchCurrentContest();
 
   await vocabStore.loadWords();
   wordsLoaded.value = true;

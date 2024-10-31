@@ -22,6 +22,7 @@
 import { ref, onMounted } from "vue";
 import { useVocabStore } from "../../stores/vocabStore";
 import { useUserStore } from "../../stores/userStore";
+import { supabase } from "../../supabase";
 
 const userStore = useUserStore();
 const vocabStore = useVocabStore();
@@ -97,12 +98,14 @@ const checkAnswer = (selected) => {
     userStore.updateScore(newScore); // Update score in Supabase and userStore
 
     // Register the correct answer with progressStore to update scheduling
+
+    const score = Math.max(0, 4 - numberOfWrongClicks.value);
     vocabStore.registerRepetition(
       currentWord.value.word_native,
-      Math.max(0, 4 - numberOfWrongClicks.value),
+      score,
       4
     );
-    console.log("correct answer registered after", numberOfWrongClicks.value, "wrong clicks");
+    logDataInSupabase(score, 4);
     loadNewWord();
 
     // Load the next question
@@ -111,6 +114,34 @@ const checkAnswer = (selected) => {
     numberOfWrongClicks.value += 1;
   }
 };
+
+const logDataInSupabase = async (score, max_score) => {
+  // Log the current score in Supabase
+  // use table: learn_log
+  // with following properties:
+  // word_id = currentWord.value.word_native
+  // displayed_front = currentWord.word_native
+  // displayed_back = wordWithCloze
+  // score = score
+  // max_score = max_score
+  // game_mode = "MissingLetterTarget"
+
+  const { data, error } = await supabase.from("learn_log").insert([
+    {
+      word_id: currentWord.value.word_native,
+      displayed_front: currentWord.value.word_native,
+      displayed_back: wordWithCloze.value,
+      score: score,
+      max_score: max_score,
+      game_mode: "MissingLetterTarget",
+      player_short: userStore.user,
+    },
+  ]);
+  if (error) {
+    console.error("Error logging data in Supabase", error);
+  }
+
+}
 
 // Initial load of vocabulary and first word
 onMounted(() => {

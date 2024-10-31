@@ -26,6 +26,8 @@ import { ref, onMounted } from "vue";
 import { useVocabStore } from "../../stores/vocabStore";
 import { useUserStore } from "../../stores/userStore";
 
+import { supabase } from "../../supabase";
+
 const userStore = useUserStore();
 const vocabStore = useVocabStore();
 
@@ -65,6 +67,7 @@ const checkAnswer = () => {
     userStore.updateScore(score.value); // Update score in global store and Supabase
     // Register the correct answer with progressStore to update scheduling
     vocabStore.registerRepetition(currentWord.value.word_native, 2, 3);
+    logDataInSupabase(2, 3);
     loadNewWord(); // Load the next word if answer is correct
   }
 };
@@ -73,7 +76,35 @@ const giveUp = () => {
   score.value -= 1;
   userStore.updateScore(score.value); // Update score
   vocabStore.registerRepetition(currentWord.value.word_native, 1, 3);
+  logDataInSupabase(1, 3);
   loadNewWord(); // Load a new word
+};
+
+const logDataInSupabase = async (score, max_score) => {
+  // Log the current score in Supabase
+  // use table: learn_log
+  // with following properties:
+  // word_id = currentWord.value.word_native
+  // displayed_front = currentWord.word_target
+  // displayed_back = parts
+  // score = score
+  // max_score = max_score
+  // game_mode = "ClozeTarget"
+
+  const { data, error } = await supabase.from("learn_log").insert([
+    {
+      word_id: currentWord.value.word_native,
+      displayed_front: currentWord.value.word_target,
+      displayed_back: parts.value,
+      score: score,
+      max_score: max_score,
+      game_mode: "ClozeTarget",
+      player_short: userStore.user,
+    },
+  ]);
+  if (error) {
+    console.error("Error logging data in Supabase", error);
+  }
 };
 
 // Initial load of vocabulary and first word

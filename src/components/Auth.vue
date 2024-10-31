@@ -15,7 +15,7 @@ const userStore = useUserStore();
 
 const login = async (shorthand) => {
   userStore.setUser(shorthand); // Set the user shorthand in the store
-  await userStore.fetchScores(); // Fetch both user's and opponent's scores
+  await userStore.fetchCurrentContest(); // Fetch both user's and opponent's scores
   router.push('/home'); // Redirect to home
 };
 </script>

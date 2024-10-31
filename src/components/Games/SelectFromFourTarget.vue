@@ -9,7 +9,7 @@
         v-for="(option, index) in answerOptions"
         :key="index"
         class="btn w-full"
-        style="font-size: 2rem; line-height: 2.5rem; height: inherit;"
+        style="font-size: 2rem; line-height: 2.5rem; height: inherit"
         @click="selectAnswer(option)"
       >
         {{ option }}
@@ -22,6 +22,7 @@
 import { ref, onMounted } from "vue";
 import { useVocabStore } from "../../stores/vocabStore";
 import { useUserStore } from "../../stores/userStore";
+import { supabase } from "../../supabase";
 
 const userStore = useUserStore();
 const vocabStore = useVocabStore();
@@ -57,16 +58,46 @@ const selectAnswer = (selected) => {
     userStore.updateScore(newScore); // Update score in Supabase and userStore
 
     // Register the correct answer with progressStore to update scheduling
+    const registeredScore = Math.max(0, 4 - numberOfWrongClicks.value);
     vocabStore.registerRepetition(
       currentQuestion.value.word_native,
-      Math.max(0, 4 - numberOfWrongClicks.value),
+      registeredScore,
       4
     );
+    logDataInSupabase(registeredScore, 4);
+
     loadNewQuestion();
 
     // Load the next question
   } else {
     numberOfWrongClicks.value += 1;
+  }
+};
+
+const logDataInSupabase = async (score, max_score) => {
+  // Log the current score in Supabase
+  // use table: learn_log
+  // with following properties:
+  // word_id = currentWord.value.word_native
+  // displayed_front = currentQuestion.word_native
+  // displayed_back = answerOptions to string
+  // score
+  // max_score
+  // game_mode = "SelectFromFourTarget"
+
+  const { data, error } = await supabase.from("learn_log").insert([
+    {
+      word_id: currentQuestion.value.word_native,
+      displayed_front: currentQuestion.value.word_native,
+      displayed_back: answerOptions.value.join(", "),
+      score: score,
+      max_score: max_score,
+      game_mode: "SelectFromFourTarget",
+      player_short: userStore.user,
+    },
+  ]);
+  if (error) {
+    console.error("Error logging data in Supabase", error);
   }
 };
 </script>

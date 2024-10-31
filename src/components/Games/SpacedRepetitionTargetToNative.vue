@@ -19,6 +19,7 @@
 import { ref, onMounted } from "vue";
 import { useUserStore } from "../../stores/userStore";
 import { useVocabStore } from "../../stores/vocabStore";
+import { supabase } from "../../supabase";
 
 const vocabStore = useVocabStore();
 const userStore = useUserStore();
@@ -51,7 +52,26 @@ const rateCard = (ratingString) => {
     easy: 3,
   }[ratingString];
   vocabStore.registerRepetition(currentWord.value.word_native, rating, 3);
+  logDataInSupabase(rating, 3);
   loadNewCard();
+};
+
+const logDataInSupabase = async (score, max_score) => {
+  const { data, error } = await supabase.from("learn_log").insert([
+    {
+      word_id: currentWord.value.word_native,
+      displayed_back: currentWord.value.word_native,
+      displayed_front: currentWord.value.word_target,
+      score,
+      max_score,
+      game_mode: "SpacedRepetitionTargetToNative",
+      player_short: userStore.user,
+    },
+  ]);
+
+  if (error) {
+    console.error("Error logging data in Supabase", error);
+  }
 };
 
 // Load vocabulary and progress on mount

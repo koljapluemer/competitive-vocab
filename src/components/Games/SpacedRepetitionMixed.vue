@@ -20,6 +20,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useUserStore } from "../../stores/userStore";
+import { supabase } from "../../supabase";
 import { useVocabStore } from "../../stores/vocabStore";
 
 const vocabStore = useVocabStore();
@@ -56,7 +57,40 @@ const rateCard = (ratingString) => {
     easy: 3,
   }[ratingString];
   vocabStore.registerRepetition(currentWord.value.word_native, rating, 3);
+  logDataInSupabase(rating, 3);
   loadNewCard();
+};
+
+const logDataInSupabase = async (score, max_score) => {
+  // Log the current score in Supabase
+  // use table: learn_log
+  // with following properties:
+  // word_id = currentWord.value.word_native
+  // displayed_front = reversedQuestion ? currentWord.word_target : currentWord.word_native
+  // displayed_back = reversedQuestion ? currentWord.word_native : currentWord.word_target }}
+  // score
+  // max_score
+  // game_mode = "SpacedRepetitionMixed"
+
+
+  const { data, error } = await supabase.from("learn_log").insert([
+    {
+      word_id: currentWord.value.word_native,
+      displayed_front: reversedQuestion.value
+        ? currentWord.value.word_target
+        : currentWord.value.word_native,
+      displayed_back: reversedQuestion.value
+        ? currentWord.value.word_native
+        : currentWord.value.word_target,
+      score,
+      max_score,
+      game_mode: "SpacedRepetitionMixed",
+      player_short: userStore.user,
+    },
+  ]);
+  if (error) {
+    console.error("Error logging data in Supabase", error);
+  }
 };
 
 // Load vocabulary and progress on mount
