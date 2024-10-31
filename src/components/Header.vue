@@ -84,6 +84,23 @@
         </svg>
       </router-link>
 
+      <button class="btn btn-square btn-outline" @click="openRandomGameMode">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
+          />
+        </svg>
+      </button>
+
       <button class="btn btn-square btn-outline" @click="copyGameStateToClipboard">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -112,7 +129,9 @@
 
 <script setup>
 import { useUserStore } from "../stores/userStore";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const userStore = useUserStore();
 
 const copyGameStateToClipboard = async () => {
@@ -142,5 +161,14 @@ const getRemainingTimeInContestInHumanReadable = () => {
   return `${days} day${days > 1 ? "s" : ""}, ${hours} hour${
     hours > 1 ? "s" : ""
   }, ${minutes} minute${minutes > 1 ? "s" : ""}`;
+};
+
+const openRandomGameMode = () => {
+  // open a random game mode
+  // include ALL of the game mode paths above in the array
+  // they're not named, we're going via route url
+  const gameModes = ["game-cloze", "game-sr-target", "game-multiple-choice", "game-sr", "game-missing-letter", "game-write-target", "game-sr-mixed"];
+  const randomGameMode = gameModes[Math.floor(Math.random() * gameModes.length)];
+  router.push(`/${randomGameMode}`);
 };
 </script>
