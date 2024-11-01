@@ -49,8 +49,6 @@ export const useUserStore = defineStore('user', {
           this.userScore = newScore;
         }
       }
-
-
     },
 
     requestBuyingSomething(price) {

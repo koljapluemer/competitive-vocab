@@ -82,6 +82,7 @@ export const useVocabStore = defineStore("vocabStore", {
           return false;
         }
       });
+      console.log("newCards: ", newCards.length);
 
       const notDueCards = relevantWords.filter((word) => {
         const card = this.localLearningData[word.word_native];
@@ -91,11 +92,14 @@ export const useVocabStore = defineStore("vocabStore", {
         const dueAsDate = new Date(card.due);
         return dueAsDate >= now;
       });
+      console.log("notDueCards: ", notDueCards.length);
+
       const notDueCardsSortedByDue = notDueCards.sort((a, b) => {
         const cardA = this.localLearningData[a.word_native];
         const cardB = this.localLearningData[b.word_native];
         return new Date(cardA.due) - new Date(cardB.due);
       });
+      console.log("notDueCardsSortedByDue: ", notDueCardsSortedByDue);
 
       // make one combined array: dueCardsSorted + newCards + notDueCardsSortedByDue
       // return the first n elements of this array
