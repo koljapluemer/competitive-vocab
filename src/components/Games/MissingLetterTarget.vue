@@ -70,7 +70,7 @@ const createCloze = () => {
   }
 
   wordWithCloze.value =
-    wordTarget.slice(0, replacedIndex) + "❓" + wordTarget.slice(replacedIndex + 1);
+    wordTarget.slice(0, replacedIndex) + "٭" + wordTarget.slice(replacedIndex + 1);
   correctAnswer.value = wordTarget[replacedIndex];
 
   // Create 4 answer options
