@@ -1,5 +1,5 @@
 <template>
-  <div class="text-center">
+  <div class="text-center mb-10">
     <h2 class="text-2xl font-bold mb-4">Game Modes</h2>
 
     <h3 class="text-xl mt-10 mb-2">arz → en</h3>
@@ -33,8 +33,9 @@
     <button class="btn w-full mb-2" @click="$router.push('/game-new')">
       See New Words
     </button>
+    <button class="btn w-full mb-2" @click="$router.push('/game-add-sentences')">
+      Add Example Sentences
+    </button>
 
-    <!-- drawing? -->
-    <span>...</span>
   </div>
 </template>

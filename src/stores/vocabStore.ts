@@ -32,6 +32,12 @@ export const useVocabStore = defineStore("vocabStore", {
       if (localLearningData) {
         this.localLearningData = JSON.parse(localLearningData);
         console.log("Local learning data loaded:", this.localLearningData);
+        // append example_sentences from localstorage to words
+        this.words.forEach((word) => {
+          if (this.localLearningData[word.word_native]) {
+            word.example_sentences = this.localLearningData[word.word_native].example_sentences;
+          }
+        });
       }
     },
 
@@ -170,6 +176,25 @@ export const useVocabStore = defineStore("vocabStore", {
         );
       }
     },
+
+    // example sentences should be an array, may not exist yet
+    addExampleSentenceToWord(wordNative: string, exampleSentence: string) {
+      if (!this.localLearningData[wordNative]) {
+        console.error("Word not yet in localLearningData: ", wordNative);
+        return;
+      }
+      const card = this.localLearningData[wordNative];
+      if (!card.example_sentences) {
+        card.example_sentences = [];
+      }
+      card.example_sentences.push(exampleSentence);
+      this.localLearningData[wordNative] = card;
+      localStorage.setItem(
+        "localLearningData",
+        JSON.stringify(this.localLearningData)
+      );
+    },
+      
 
     // this is called when a word is not yet rated
     // and not yet stored in localstorage
