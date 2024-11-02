@@ -75,6 +75,8 @@ export const useVocabStore = defineStore("vocabStore", {
         return !(new Date(cardA.due) - new Date(cardB.due));
       });
 
+      console.log("dueCardsSorted: ", dueCardsSorted);
+
       //   make another array:
       // this one should contain two types of words
       // those that are not due, and those that are not yet in localLearningData
@@ -88,7 +90,7 @@ export const useVocabStore = defineStore("vocabStore", {
           return false;
         }
       });
-      console.log("newCards: ", newCards.length);
+      console.log("newCards: ", newCards);
 
       const notDueCards = relevantWords.filter((word) => {
         const card = this.localLearningData[word.word_native];
@@ -98,7 +100,6 @@ export const useVocabStore = defineStore("vocabStore", {
         const dueAsDate = new Date(card.due);
         return dueAsDate >= now;
       });
-      console.log("notDueCards: ", notDueCards.length);
 
       const notDueCardsSortedByDue = notDueCards.sort((a, b) => {
         const cardA = this.localLearningData[a.word_native];
@@ -114,6 +115,7 @@ export const useVocabStore = defineStore("vocabStore", {
         ...newCards,
         ...notDueCardsSortedByDue,
       ];
+      console.log("Combined Cards, Sorted: ", combined);
       return combined.slice(0, n);
     },
 
@@ -174,6 +176,8 @@ export const useVocabStore = defineStore("vocabStore", {
           "localLearningData",
           JSON.stringify(this.localLearningData)
         );
+
+        console.log("local  learning data updated: ", this.localLearningData);
       }
     },
 

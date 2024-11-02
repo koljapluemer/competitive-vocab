@@ -52,6 +52,7 @@ const loadNewWord = () => {
 
 const addSentence = async () => {
   vocabStore.addExampleSentenceToWord(currentWord.value.word_native, inputAnswer.value);
+  vocabStore.registerRepetition(currentWord.value.word_native, 2, 3);
   logDataInSupabase(2, 3);
   score.value += 2;
   userStore.updateScore(score.value);
