@@ -44,13 +44,15 @@ export const useVocabStore = defineStore("vocabStore", {
       if (localLearningData) {
         this.localLearningData = JSON.parse(localLearningData);
         console.log("Local learning data loaded:", this.localLearningData);
-        // append example_sentences from localstorage to words
+        // add the rest of the data from localstorage to the word
         this.words.forEach((word) => {
           if (this.localLearningData[word.word_native]) {
-            word.example_sentences = this.localLearningData[word.word_native].example_sentences;
+            Object.assign(word, this.localLearningData[word.word_native]);
           }
         });
       }
+
+      console.log("Words loaded: ", this.words);
 
       // TODO: right now I just hardcoded the contexts above
       // (so Marta has hers activated and mine deactivated)
