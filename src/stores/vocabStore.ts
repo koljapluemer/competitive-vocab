@@ -18,24 +18,22 @@ export const useVocabStore = defineStore("vocabStore", {
   state: () => ({
     words: [] as { word_native: string; word_target: string }[],
     localLearningData: {} as Record<string, any>,
-    vocabContexts: 
-    [
+    lastUsedWord: "" as string,
+    vocabContexts: [
       {
-        "name": "Marta Jonas 200",
-        "active": true,
+        name: "Marta Jonas 200",
+        active: true,
       },
       {
-        "name": "Sam Naguib Mahfouz P1",
-        "active": false,
+        name: "Sam Naguib Mahfouz P1",
+        active: false,
       },
     ],
   }),
-  
+
   actions: {
     async loadWords() {
-      const { data, error } = await supabase
-        .from("words")
-        .select();
+      const { data, error } = await supabase.from("words").select();
       if (error) {
         console.error("Error loading vocabulary from Supabase:", error);
       }
@@ -82,20 +80,22 @@ export const useVocabStore = defineStore("vocabStore", {
 
       console.log("Words with target short: ", relevantWords.length);
 
+      // remove words that are not in an active context
+      relevantWords = relevantWords.filter((word) => {
+        return this.vocabContexts.some((context) => {
+          return context.active && word.context === context.name;
+        });
+      });
+
+      console.log("Words in active context: ", relevantWords.length);
+
       const now = new Date();
       const dueCards = relevantWords.filter((word) => {
-        const card = this.localLearningData[word.word_native];
-        if (!card) {
-          return false;
-        }
-        const dueAsDate = new Date(card.due);
-        return dueAsDate < now;
+        return word.due && new Date(word.due) < now;
       });
 
       const dueCardsSorted = dueCards.sort((a, b) => {
-        const cardA = this.localLearningData[a.word_native];
-        const cardB = this.localLearningData[b.word_native];
-        return !(new Date(cardA.due) - new Date(cardB.due));
+        return new Date(a.due) - new Date(b.due);
       });
 
       console.log("dueCardsSorted: ", dueCardsSorted);
@@ -105,29 +105,19 @@ export const useVocabStore = defineStore("vocabStore", {
       // those that are not due, and those that are not yet in localLearningData
       // new ones (not yet in data) should come first, then the not due ones, sorted by due (which IS NOT CALLED 'nextDue' BUT JUST 'due')
 
+      // "!due" refers to the absence of that property, not to the card not being due
+      // (since it is a timestamp, not set before it was at least seen once)
       const newCards = relevantWords.filter((word) => {
-        const card = this.localLearningData[word.word_native];
-        if (!card) {
-          return true;
-        } else {
-          return false;
-        }
+        return !word.due;
       });
       console.log("newCards: ", newCards);
 
       const notDueCards = relevantWords.filter((word) => {
-        const card = this.localLearningData[word.word_native];
-        if (!card) {
-          return false;
-        }
-        const dueAsDate = new Date(card.due);
-        return dueAsDate >= now;
+        return !word.due || new Date(word.due) > now;
       });
 
       const notDueCardsSortedByDue = notDueCards.sort((a, b) => {
-        const cardA = this.localLearningData[a.word_native];
-        const cardB = this.localLearningData[b.word_native];
-        return new Date(cardA.due) - new Date(cardB.due);
+        return new Date(a.due) - new Date(b.due);
       });
       console.log("notDueCardsSortedByDue: ", notDueCardsSortedByDue);
 
@@ -138,6 +128,20 @@ export const useVocabStore = defineStore("vocabStore", {
         ...newCards,
         ...notDueCardsSortedByDue,
       ];
+
+      // remove lastUsedWord from the array (so we don't get the same word twice in a row)
+      if (this.lastUsedWord) {
+        const index = combined.findIndex((word) => {
+          return word.word_native === this.lastUsedWord;
+        });
+        if (index !== -1) {
+          combined.splice(index, 1);
+        }
+      }
+
+      // update lastUsedWord
+      this.lastUsedWord = combined[0].word_native;
+
       console.log("Combined Cards, Sorted: ", combined);
       return combined.slice(0, n);
     },
@@ -147,6 +151,16 @@ export const useVocabStore = defineStore("vocabStore", {
       let newWords = this.words.filter((word) => {
         return !this.localLearningData[word.word_native];
       });
+
+      // remove words that are not in an active context
+      newWords = newWords.filter((word) => {
+        return this.vocabContexts.some((context) => {
+          return context.active && word.context === context.name;
+        });
+      });
+
+      console.log("Words in active context: ", newWords.length);
+
       console.log(`New words: ${newWords.length}`);
       newWords = newWords.sort(() => Math.random() - 0.5);
 
@@ -221,7 +235,6 @@ export const useVocabStore = defineStore("vocabStore", {
         JSON.stringify(this.localLearningData)
       );
     },
-      
 
     // this is called when a word is not yet rated
     // and not yet stored in localstorage
@@ -242,6 +255,6 @@ export const useVocabStore = defineStore("vocabStore", {
       if (context) {
         context.active = !context.active;
       }
-    }
+    },
   },
 });
