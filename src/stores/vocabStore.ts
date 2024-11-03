@@ -17,6 +17,7 @@ import {
 export const useVocabStore = defineStore("vocabStore", {
   state: () => ({
     words: [] as { word_native: string; word_target: string }[],
+    // localLearningData is NOT used dynamically, only when loading initially!!
     localLearningData: {} as Record<string, any>,
     lastUsedWord: "" as string,
     vocabContexts: [
@@ -38,9 +39,9 @@ export const useVocabStore = defineStore("vocabStore", {
         console.error("Error loading vocabulary from Supabase:", error);
       }
       this.words = data || [];
-      const localLearningData = localStorage.getItem("localLearningData");
-      if (localLearningData) {
-        this.localLearningData = JSON.parse(localLearningData);
+      const localLearningDataJSON = localStorage.getItem("localLearningData");
+      if (localLearningDataJSON) {
+        this.localLearningData = JSON.parse(localLearningDataJSON);
         console.log("Local learning data loaded:", this.localLearningData);
         // add the rest of the data from localstorage to the word
         this.words.forEach((word) => {
@@ -147,9 +148,9 @@ export const useVocabStore = defineStore("vocabStore", {
     },
 
     getPreviouslyUnseenWords(n: number) {
-      // get all words that are not yet in localLearningData
+      // get all words that have no t been seen, aka have no due date
       let newWords = this.words.filter((word) => {
-        return !this.localLearningData[word.word_native];
+        return !word.due;
       });
 
       // remove words that are not in an active context
@@ -168,8 +169,10 @@ export const useVocabStore = defineStore("vocabStore", {
     },
 
     registerRepetition(wordNative: string, rating: number, max_rating: number) {
-      // if word is not saved in localstorage, ignore actual rating and just save it
-      if (!this.localLearningData[wordNative]) {
+      const word = this.words.find((word) => word.word_native === wordNative);
+      // if word was never rated, ignore actual rating and just save it
+      // check by seeing if in words it has a due date set:
+      if (!word.due) {
         console.info("New card registered: ", wordNative);
         this.createFSRSCard(wordNative);
         return;
@@ -186,7 +189,7 @@ export const useVocabStore = defineStore("vocabStore", {
         const mappedRatingRounded = Math.floor(mappedRating);
         // use ts-fsrs grades:
         // 0: Again, 1: Hard, 2: Good, 3: Easy
-        let card = this.localLearningData[wordNative];
+        let card = word;
         const schedulingCards: RecordLog = f.repeat(card, new Date());
         switch (mappedRatingRounded) {
           case 0:
@@ -206,15 +209,28 @@ export const useVocabStore = defineStore("vocabStore", {
             return;
         }
 
-        // update localstorage/state
-        // TODO: this state update here doesn't seem to work?!
-        this.localLearningData[wordNative] = card;
+        // update word in words[] with new data
+        // (also save the changes to localstorage)
+        this.words = this.words.map((word) => {
+          if (word.word_native === wordNative) {
+            return card;
+          } else {
+            return word;
+          }
+        });
+
+        // loop properties of card and update localLearningData
+        const cardData = { ...card };
+        Object.keys(cardData).forEach((key) => {
+          this.localLearningData[wordNative][key] = cardData[key];
+        });
+        console.log("local learning data updated: ", this.localLearningData);
+
         localStorage.setItem(
           "localLearningData",
           JSON.stringify(this.localLearningData)
         );
 
-        console.log("local  learning data updated: ", this.localLearningData);
       }
     },
 
