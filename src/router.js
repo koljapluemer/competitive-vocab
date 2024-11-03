@@ -3,6 +3,7 @@ import { createPinia } from 'pinia';
 import { useUserStore } from './stores/userStore'; // Adjust path to where `store.js` is located
 import Auth from './components/Auth.vue';
 import Home from './components/Home.vue';
+import Settings from './components/Settings.vue';
 import SelectFromFourTarget from './components/Games/SelectFromFourTarget.vue';
 import SpacedRepetitionNativeToTarget from './components/Games/SpacedRepetitionNativeToTarget.vue';
 import SpacedRepetitionTargetToNative from './components/Games/SpacedRepetitionTargetToNative.vue';
@@ -18,6 +19,7 @@ const pinia = createPinia(); // Create a Pinia instance
 const routes = [
   { path: '/', component: Auth },
   { path: '/home', component: Home },
+  { path: '/settings', component: Settings },
   { path: '/game-multiple-choice', component: SelectFromFourTarget }, // Multiple-choice game
   { path: '/game-cloze', component: ClozeTarget }, // New cloze deletion game mode
   { path: '/game-sr', component: SpacedRepetitionNativeToTarget },

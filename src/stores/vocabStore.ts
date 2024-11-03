@@ -18,7 +18,19 @@ export const useVocabStore = defineStore("vocabStore", {
   state: () => ({
     words: [] as { word_native: string; word_target: string }[],
     localLearningData: {} as Record<string, any>,
+    vocabContexts: 
+    [
+      {
+        "name": "Marta Jonas 200",
+        "active": true,
+      },
+      {
+        "name": "Sam Naguib Mahfouz P1",
+        "active": false,
+      },
+    ],
   }),
+  
   actions: {
     async loadWords() {
       const { data, error } = await supabase
@@ -39,6 +51,15 @@ export const useVocabStore = defineStore("vocabStore", {
           }
         });
       }
+
+      // TODO: right now I just hardcoded the contexts above
+      // (so Marta has hers activated and mine deactivated)
+      // ...that's rather hacky
+      // code below starts dynamically getting contexts from the data
+
+      // get an array of unique values for the prop "context" in the supabase data we just got
+      // const contexts = Array.from(new Set(this.words.map((word) => word.context)));
+      // console.log("Contexts: ", contexts);
     },
 
     getWords(n: number, ignoreWordsWithoutTargetShort = false) {
@@ -210,5 +231,15 @@ export const useVocabStore = defineStore("vocabStore", {
         JSON.stringify(this.localLearningData)
       );
     },
+
+    toggleContext(contextName: string) {
+      // find the context in the array and toggle its active property
+      const context = this.vocabContexts.find((context) => {
+        return context.name === contextName;
+      });
+      if (context) {
+        context.active = !context.active;
+      }
+    }
   },
 });
