@@ -117,17 +117,16 @@ export const useVocabStore = defineStore("vocabStore", {
         return !word.due || new Date(word.due) > now;
       });
 
-      const notDueCardsSortedByDue = notDueCards.sort((a, b) => {
-        return new Date(a.due) - new Date(b.due);
-      });
-      console.log("notDueCardsSortedByDue: ", notDueCardsSortedByDue);
+      // we sort these randomly, otherwise we have a lot of the same repetitions
+      const notDueCardsSortedRandomly = notDueCards.sort(() => Math.random() - 0.5);
+      console.log("notDueCardsSortedByDue: ", notDueCardsSortedRandomly);
 
       // make one combined array: dueCardsSorted + newCards + notDueCardsSortedByDue
       // return the first n elements of this array
       const combined = [
         ...dueCardsSorted,
         ...newCards,
-        ...notDueCardsSortedByDue,
+        ...notDueCardsSortedRandomly,
       ];
 
       // remove lastUsedWord from the array (so we don't get the same word twice in a row)
