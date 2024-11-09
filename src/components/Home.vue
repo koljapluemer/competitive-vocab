@@ -1,8 +1,9 @@
 <template>
   <div class="text-center mb-10">
+    <span>Cards due right now: {{vocabStore.getVocabStatistics()["nr_of_cards"]  -  vocabStore.getVocabStatistics()["nr_of_due_cards"] }} / {{ vocabStore.getVocabStatistics()["nr_of_cards"] }} </span>
+    <progress class="progress progress-primary w-56" :value='vocabStore.getVocabStatistics()["nr_of_cards"]  -  vocabStore.getVocabStatistics()["nr_of_due_cards"]' :max='vocabStore.getVocabStatistics()["nr_of_cards"]'></progress>
 
-
-    <h2 class="text-2xl font-bold mb-4">Game Modes</h2>
+    <h2 class="text-2xl font-bold mb-4 mt-10">Game Modes</h2>
 
     <h3 class="text-xl mt-10 mb-2">arz → en</h3>
     <button class="btn w-full mb-2" @click="$router.push('/game-cloze')">
@@ -38,18 +39,14 @@
     <button class="btn w-full mb-2" @click="$router.push('/game-add-sentences')">
       Add Example Sentences
     </button>
-
   </div>
 </template>
 
-
 <script setup>
-
-import { ref, onMounted } from "vue";
 import { useVocabStore } from "../stores/vocabStore";
+// import { ref, onMounted } from "vue";
+
 
 const vocabStore = useVocabStore();
-
-console.log("STATS:", vocabStore.getVocabStatistics())
 
 </script>
