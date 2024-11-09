@@ -40,9 +40,11 @@ onMounted(() => {
 // Fetch and set the next due card as the current question
 const loadNewQuestion = () => {
   console.log("Loading new question");
-  const wordsForPuzzle = vocabStore.getWords(4); // returns 4!!! words, 1 to be used as the correct answer
+  const correctWords = vocabStore.getWords(1)
+  const otherOptions = vocabStore.getWords(3, false, true); 
+  const wordsForPuzzle = [ ...correctWords, ...otherOptions];
   console.log("words for puzzle", wordsForPuzzle);
-  currentQuestion.value = wordsForPuzzle[0];
+  currentQuestion.value = correctWords[0];
   numberOfWrongClicks.value = 0;
   answerOptions.value = [];
   for (const word of wordsForPuzzle) {

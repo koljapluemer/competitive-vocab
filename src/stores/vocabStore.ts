@@ -63,13 +63,16 @@ export const useVocabStore = defineStore("vocabStore", {
       // console.log("Contexts: ", contexts);
     },
 
-    getWords(n: number, ignoreWordsWithoutTargetShort = false) {
+    getWords(
+      n: number,
+      ignoreWordsWithoutTargetShort = false,
+      shuffleCompletely = false
+    ) {
       //   first, get all cards that are actually due, sorted by nextDue (first due first in list)
       // words[] is the authorative list, and localLearningData is used to check whether learning data exist per word
       //   therefor, ONLYYY words in words[] are considered
       // relevant prop is simply called "due" and has format due:"2024-11-12T14:29:29.441Z"
       let relevantWords = this.words;
-
 
       if (ignoreWordsWithoutTargetShort) {
         // check for property word_target_short
@@ -115,12 +118,14 @@ export const useVocabStore = defineStore("vocabStore", {
       });
 
       // we sort these randomly, otherwise we have a lot of the same repetitions
-      const notDueCardsSortedRandomly = notDueCards.sort(() => Math.random() - 0.5);
+      const notDueCardsSortedRandomly = notDueCards.sort(
+        () => Math.random() - 0.5
+      );
       console.log("notDueCardsSortedByDue: ", notDueCardsSortedRandomly);
 
       // make one combined array: dueCardsSorted + newCards + notDueCardsSortedByDue
       // return the first n elements of this array
-      const combined = [
+      let combined = [
         ...dueCardsSorted,
         ...newCards,
         ...notDueCardsSortedRandomly,
@@ -140,14 +145,16 @@ export const useVocabStore = defineStore("vocabStore", {
       this.lastUsedWord = combined[0].word_native;
 
       console.log("Combined Cards, Sorted: ", combined);
+      if (shuffleCompletely) {
+        combined = combined.sort(() => Math.random() - 0.5);
+      }
+      
       return combined.slice(0, n);
     },
 
     getVocabStatistics() {
-
       let relevantWords = this.words;
       const now = new Date();
-
 
       // remove words that are not in an active context
       relevantWords = relevantWords.filter((word) => {
@@ -167,11 +174,11 @@ export const useVocabStore = defineStore("vocabStore", {
       });
 
       return {
-        "nr_of_cards": relevantWords.length,
-        "nr_of_due_cards": dueCards.length,
-        "nr_of_new_cards": newCards.length,
-        "nr_of_not_due_cards": notDueCards.length
-      }
+        nr_of_cards: relevantWords.length,
+        nr_of_due_cards: dueCards.length,
+        nr_of_new_cards: newCards.length,
+        nr_of_not_due_cards: notDueCards.length,
+      };
     },
 
     getPreviouslyUnseenWords(n: number) {
@@ -257,7 +264,6 @@ export const useVocabStore = defineStore("vocabStore", {
           "localLearningData",
           JSON.stringify(this.localLearningData)
         );
-
       }
     },
 
