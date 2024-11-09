@@ -70,7 +70,6 @@ export const useVocabStore = defineStore("vocabStore", {
       // relevant prop is simply called "due" and has format due:"2024-11-12T14:29:29.441Z"
       let relevantWords = this.words;
 
-      console.log("Words in store: ", relevantWords.length);
 
       if (ignoreWordsWithoutTargetShort) {
         // check for property word_target_short
@@ -78,8 +77,6 @@ export const useVocabStore = defineStore("vocabStore", {
           return word.word_target_short;
         });
       }
-
-      console.log("Words with target short: ", relevantWords.length);
 
       // remove words that are not in an active context
       relevantWords = relevantWords.filter((word) => {
@@ -114,7 +111,7 @@ export const useVocabStore = defineStore("vocabStore", {
       console.log("newCards: ", newCards);
 
       const notDueCards = relevantWords.filter((word) => {
-        return !word.due || new Date(word.due) > now;
+        return word.due && new Date(word.due) > now;
       });
 
       // we sort these randomly, otherwise we have a lot of the same repetitions
@@ -144,6 +141,37 @@ export const useVocabStore = defineStore("vocabStore", {
 
       console.log("Combined Cards, Sorted: ", combined);
       return combined.slice(0, n);
+    },
+
+    getVocabStatistics() {
+
+      let relevantWords = this.words;
+      const now = new Date();
+
+
+      // remove words that are not in an active context
+      relevantWords = relevantWords.filter((word) => {
+        return this.vocabContexts.some((context) => {
+          return context.active && word.context === context.name;
+        });
+      });
+
+      const dueCards = relevantWords.filter((word) => {
+        return word.due && new Date(word.due) < now;
+      });
+      const newCards = relevantWords.filter((word) => {
+        return !word.due;
+      });
+      const notDueCards = relevantWords.filter((word) => {
+        return word.due && new Date(word.due) > now;
+      });
+
+      return {
+        "nr_of_cards": relevantWords.length,
+        "nr_of_due_cards": dueCards.length,
+        "nr_of_new_cards": newCards.length,
+        "nr_of_not_due_cards": notDueCards.length
+      }
     },
 
     getPreviouslyUnseenWords(n: number) {
