@@ -305,5 +305,12 @@ export const useVocabStore = defineStore("vocabStore", {
         context.active = !context.active;
       }
     },
+
+    resetLocalStorage() {
+      localStorage.setItem(
+        "localLearningData",
+        JSON.stringify({})
+      );
+    }
   },
 });

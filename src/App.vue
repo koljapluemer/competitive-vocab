@@ -5,7 +5,7 @@
   <div class="m-auto flex-grow max-w-md px-2" v-else>...</div>
 
   <div class="mx-auto mt-20 text-center">
-    <small class="">v0.24.11.09.2</small>
+    <small class="">v0.24.11.11.1</small>
   </div>
 </template>
 

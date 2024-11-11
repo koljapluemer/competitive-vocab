@@ -13,6 +13,7 @@ import MissingLetterTarget from './components/Games/MissingLetterTarget.vue';
 import SeeNew from './components/Games/SeeNew.vue';
 import WriteTarget from './components/Games/WriteTarget.vue';
 import AddExampleSentence from './components/Games/AddExampleSentence.vue';
+import ResetLocalStorage from './components/ResetLocalStorage.vue';
 
 const pinia = createPinia(); // Create a Pinia instance
 
@@ -29,6 +30,7 @@ const routes = [
   { path: '/game-new', component: SeeNew },
   { path: '/game-write-target', component: WriteTarget },
   { path: '/game-add-sentences', component: AddExampleSentence },
+  { path: '/reset', component: ResetLocalStorage}
 ];
 
 const router = createRouter({
