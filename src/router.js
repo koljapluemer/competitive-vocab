@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import { createPinia } from 'pinia';
 import { useUserStore } from './stores/userStore'; // Adjust path to where `store.js` is located
 import Auth from './components/Auth.vue';
@@ -34,7 +34,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 });
 
