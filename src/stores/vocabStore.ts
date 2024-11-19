@@ -46,7 +46,7 @@ export const useVocabStore = defineStore("vocabStore", {
     // basically a write-only
     // gets read once, at app start, then is only used to save learning progress locally
     localLearningData: {},
-    lastUsedWord: "" as string,
+    lastUsedWords: [] as Word[],
     vocabContexts: [
       {
         name: "Marta Jonas 200",
@@ -95,8 +95,7 @@ export const useVocabStore = defineStore("vocabStore", {
           word.reps = wordLearningData.reps;
           word.lapses = wordLearningData.lapses;
           word.state = wordLearningData.state;
-          word.last_review = wordLearningData.last_review
-
+          word.last_review = wordLearningData.last_review;
         }
 
         this.words.push(word);
@@ -130,9 +129,11 @@ export const useVocabStore = defineStore("vocabStore", {
       // get words that are due
       // could sort these, but it also kinda doesn't matter, due is due
       const now = new Date();
-      const dueWords = relevantWords.filter((word) => {
-        return word.due && word.due < now;
-      });
+      const dueWords = relevantWords
+        .filter((word) => {
+          return word.due && word.due < now;
+        })
+        .sort(() => Math.random() - 0.5);
       console.log("dueWords: ", dueWords);
 
       // words never learned before (shuffled)
@@ -151,25 +152,27 @@ export const useVocabStore = defineStore("vocabStore", {
         .sort(() => Math.random() - 0.5);
       console.log("words due in the future", wordsDueInTheFuture);
 
+
       let combinedWords = [
         ...dueWords,
         ...wordsNeverLearnedBefore,
         ...wordsDueInTheFuture,
       ];
+      console.log('combined has length:', combinedWords.length)
 
-      if (this.lastUsedWord) {
-        const index = combinedWords.findIndex((word) => {
-          return word.wordNative === this.lastUsedWord;
-        });
-        if (index !== -1) {
-          combinedWords.splice(index, 1);
-        }
+
+      for (let _word of this.lastUsedWords) {
+        combinedWords = combinedWords.filter(word => word != _word)
       }
+
+      console.log('after filtering last used, combined has length:', combinedWords.length)
 
       if (shuffleCompletely) {
         combinedWords = combinedWords.sort(() => Math.random() - 0.5);
       } else {
-        this.lastUsedWord = combinedWords[0].wordNative;
+        this.lastUsedWords.push(combinedWords[0]);
+        this.lastUsedWords = this.lastUsedWords.slice(-4)
+        console.log('last used:', this.lastUsedWords)
       }
 
       const slice = combinedWords.slice(0, n);
@@ -177,7 +180,7 @@ export const useVocabStore = defineStore("vocabStore", {
     },
 
     getVocabStatistics() {
-      let relevantWords:Word[] = this.words;
+      let relevantWords: Word[] = this.words;
       const now = new Date();
 
       // remove words that are not in an active context
@@ -203,7 +206,7 @@ export const useVocabStore = defineStore("vocabStore", {
         nr_of_new_words: newCards.length,
         nr_of_not_due_words: notDueCards.length,
       };
-      return returnObject
+      return returnObject;
     },
 
     getPreviouslyUnseenWords(n: number): Word[] {
@@ -283,9 +286,8 @@ export const useVocabStore = defineStore("vocabStore", {
       word.state = card.state;
       word.last_review = card.last_review;
 
-
-      this.localLearningData[word.wordNative] = word 
-      this.saveLearningDataLocally()
+      this.localLearningData[word.wordNative] = word;
+      this.saveLearningDataLocally();
     },
 
     saveLearningDataLocally() {

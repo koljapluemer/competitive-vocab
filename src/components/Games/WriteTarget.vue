@@ -43,9 +43,10 @@ const loadNewWord = () => {
   const wordArr = vocabStore.getWords(1, true);
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
+    console.log('word', currentWord.value)
     inputAnswer.value = "";
     hintString.value = "٭".repeat(
-      normalizeArabicText(currentWord.value.wordTarget_short).length
+      normalizeArabicText(currentWord.value.wordTargetShort).length
     );
   }
 };
@@ -53,7 +54,7 @@ const loadNewWord = () => {
 const checkAnswer = () => {
   if (
     normalizeArabicText(inputAnswer.value) ===
-    normalizeArabicText(currentWord.value.wordTarget_short)
+    normalizeArabicText(currentWord.value.wordTargetShort)
   ) {
     score.value += 5;
     userStore.updateScore(score.value); // Update score in global store and Supabase
@@ -79,7 +80,7 @@ const logDataInSupabase = async (score, max_score) => {
     {
       word_id: currentWord.value.wordNative,
       displayed_front: currentWord.value.wordNative,
-      displayed_back: currentWord.value.wordTarget_short,
+      displayed_back: currentWord.value.wordTargetShort,
       score: score,
       max_score: max_score,
       game_mode: "WriteTarget",
@@ -101,7 +102,7 @@ const revealLetter = () => {
   }
 
   const hintArr = hintString.value.split("");
-  const targetArr = normalizeArabicText(currentWord.value.wordTarget_short).split("");
+  const targetArr = normalizeArabicText(currentWord.value.wordTargetShort).split("");
 
   if (hintArr.includes("٭")) {
     let randomIndex = Math.floor(Math.random() * hintArr.length);
