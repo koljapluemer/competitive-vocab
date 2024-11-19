@@ -152,30 +152,44 @@ export const useVocabStore = defineStore("vocabStore", {
         .sort(() => Math.random() - 0.5);
       console.log("words due in the future", wordsDueInTheFuture);
 
-
       let combinedWords = [
         ...dueWords,
         ...wordsNeverLearnedBefore,
         ...wordsDueInTheFuture,
       ];
-      console.log('combined has length:', combinedWords.length)
-
+      console.log("combined has length:", combinedWords.length);
 
       for (let _word of this.lastUsedWords) {
-        combinedWords = combinedWords.filter(word => word != _word)
+        combinedWords = combinedWords.filter((word) => word != _word);
       }
 
-      console.log('after filtering last used, combined has length:', combinedWords.length)
+      console.log(
+        "after filtering last used, combined has length:",
+        combinedWords.length
+      );
 
       if (shuffleCompletely) {
         combinedWords = combinedWords.sort(() => Math.random() - 0.5);
       } else {
         this.lastUsedWords.push(combinedWords[0]);
-        this.lastUsedWords = this.lastUsedWords.slice(-4)
-        console.log('last used:', this.lastUsedWords)
+        this.lastUsedWords = this.lastUsedWords.slice(-4);
+        console.log("last used:", this.lastUsedWords);
       }
 
       const slice = combinedWords.slice(0, n);
+
+      // if words were not seen, at basic learning data
+      console.log('slice before adding learning data', slice)
+      for (let word of slice) {
+        if (typeof word.due === "undefined") {
+          console.log('new word in slice!')
+          const card = createEmptyCard();
+          word = this.setLearningDataFieldsOnWord(card, word);
+        }
+      }
+      console.log('slice after adding learning data', slice)
+
+
       return slice;
     },
 
@@ -227,67 +241,67 @@ export const useVocabStore = defineStore("vocabStore", {
       let word = this.words.find((word) => word.wordNative === wordNative);
       let card: Card;
 
-      // if word was never rated, ignore actual rating and just save it
-      // check by seeing if in words it has a due date set:
-      if (typeof word.due === "undefined") {
-        console.info("New word registered: ", wordNative);
-        card = createEmptyCard();
-      } else {
-        const params: FSRSParameters = generatorParameters({
-          maximum_interval: 1000,
-        });
-        const f: FSRS = new FSRS(params);
+      const params: FSRSParameters = generatorParameters({
+        maximum_interval: 1000,
+      });
+      const f: FSRS = new FSRS(params);
 
-        console.info("Previously registered word rated: ", rating);
-        // map the rating from min 0-max-rating to 0-3
-        const mappedRating = (3 * rating) / max_rating;
-        // round down
-        const mappedRatingRounded = Math.floor(mappedRating);
-        // use ts-fsrs grades:
-        // 0: Again, 1: Hard, 2: Good, 3: Easy
-        card = {
-          due: word.due,
-          stability: word.stability,
-          difficulty: word.difficulty,
-          elapsed_days: word.elapsed_days,
-          scheduled_days: word.scheduled_days,
-          reps: word.reps,
-          lapses: word.lapses,
-          state: word.state,
-          last_review: word.last_review,
-        };
-        const schedulingCards: RecordLog = f.repeat(card, new Date());
-        switch (mappedRatingRounded) {
-          case 0:
-            card = schedulingCards[Rating.Again].card;
-            break;
-          case 1:
-            card = schedulingCards[Rating.Hard].card;
-            break;
-          case 2:
-            card = schedulingCards[Rating.Good].card;
-            break;
-          case 3:
-            card = schedulingCards[Rating.Easy].card;
-            break;
-          default:
-            console.error("Rating out of range: ", mappedRatingRounded);
-            return;
-        }
+      console.info("Previously registered word rated: ", rating);
+      // map the rating from min 0-max-rating to 0-3
+      const mappedRating = (3 * rating) / max_rating;
+      // round down
+      const mappedRatingRounded = Math.floor(mappedRating);
+      // use ts-fsrs grades:
+      // 0: Again, 1: Hard, 2: Good, 3: Easy
+      card = {
+        due: word.due,
+        stability: word.stability,
+        difficulty: word.difficulty,
+        elapsed_days: word.elapsed_days,
+        scheduled_days: word.scheduled_days,
+        reps: word.reps,
+        lapses: word.lapses,
+        state: word.state,
+        last_review: word.last_review,
+      };
+      const schedulingCards: RecordLog = f.repeat(card, new Date());
+      switch (mappedRatingRounded) {
+        case 0:
+          card = schedulingCards[Rating.Again].card;
+          break;
+        case 1:
+          card = schedulingCards[Rating.Hard].card;
+          break;
+        case 2:
+          card = schedulingCards[Rating.Good].card;
+          break;
+        case 3:
+          card = schedulingCards[Rating.Easy].card;
+          break;
+        default:
+          console.error("Rating out of range: ", mappedRatingRounded);
+          return;
       }
 
-      word.due = card.due;
-      word.stability = card.stability;
-      word.difficulty = card.difficulty;
-      word.elapsed_days = card.elapsed_days;
-      word.scheduled_days = card.scheduled_days;
-      word.reps = card.reps;
-      word.lapses = card.lapses;
-      word.state = card.state;
-      word.last_review = card.last_review;
+      word = this.setLearningDataFieldsOnWord(card, word);
+      console.log('word after rep', word)
 
       this.localLearningData[word.wordNative] = word;
       this.saveLearningDataLocally();
+    },
+
+    setLearningDataFieldsOnWord(learningData: Card, word: Word) {
+      word.due = learningData.due;
+      word.stability = learningData.stability;
+      word.difficulty = learningData.difficulty;
+      word.elapsed_days = learningData.elapsed_days;
+      word.scheduled_days = learningData.scheduled_days;
+      word.reps = learningData.reps;
+      word.lapses = learningData.lapses;
+      word.state = learningData.state;
+      word.last_review = learningData.last_review;
+
+      return word;
     },
 
     saveLearningDataLocally() {
