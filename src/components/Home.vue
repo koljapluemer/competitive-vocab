@@ -1,7 +1,7 @@
 <template>
   <div class="text-center mb-10">
-    <span>Cards due right now: {{vocabStore.getVocabStatistics()["nr_of_cards"]  -  vocabStore.getVocabStatistics()["nr_of_due_cards"] }} / {{ vocabStore.getVocabStatistics()["nr_of_cards"] }} </span>
-    <progress class="progress progress-primary w-56" :value='vocabStore.getVocabStatistics()["nr_of_cards"]  -  vocabStore.getVocabStatistics()["nr_of_due_cards"]' :max='vocabStore.getVocabStatistics()["nr_of_cards"]'></progress>
+    <span>Cards due right now: {{vocabStore.getVocabStatistics()["nr_of_new_words"]  +  vocabStore.getVocabStatistics()["nr_of_due_words"] }} / {{ vocabStore.getVocabStatistics()["nr_of_words"] }} </span>
+    <progress class="progress progress-primary w-56" :value='vocabStore.getVocabStatistics()["nr_of_new_words"]  +  vocabStore.getVocabStatistics()["nr_of_due_words"]' :max='vocabStore.getVocabStatistics()["nr_of_words"]'></progress>
 
     <h2 class="text-2xl font-bold mb-4 mt-10">Game Modes</h2>
 

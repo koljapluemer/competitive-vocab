@@ -31,12 +31,12 @@ interface Word {
   due?: Date;
   stability?: number;
   difficulty?: number;
-  elapsedDays?: number;
-  scheduledDays?: number;
+  elapsed_days?: number;
+  scheduled_days?: number;
   reps?: number;
   lapses?: number;
   state?: number;
-  lastReview?: Date;
+  last_review?: Date;
 }
 
 // first, create a simple store, ignoring fsrs for now
@@ -69,8 +69,6 @@ export const useVocabStore = defineStore("vocabStore", {
       const localLearningDataJSON = localStorage.getItem("localLearningData");
       if (localLearningDataJSON) {
         this.localLearningData = JSON.parse(localLearningDataJSON);
-        console.log("Local learning data loaded:", this.localLearningData);
-        // add the rest of the data from localstorage to the word
       }
       wordsFromSupabase.forEach((_word) => {
         const word: Word = {
@@ -92,19 +90,18 @@ export const useVocabStore = defineStore("vocabStore", {
           word.due = new Date(wordLearningData.due);
           word.stability = wordLearningData.stability;
           word.difficulty = wordLearningData.difficulty;
-          word.elapsedDays = wordLearningData.elapsed_days;
-          word.scheduledDays = wordLearningData.scheduled_days;
+          word.elapsed_days = wordLearningData.elapsed_days;
+          word.scheduled_days = wordLearningData.scheduled_days;
           word.reps = wordLearningData.reps;
           word.lapses = wordLearningData.lapses;
           word.state = wordLearningData.state;
-          word.lastReview = wordLearningData.lastReview
-          console.log("slapped in extra data:",word);
+          word.last_review = wordLearningData.last_review
 
         }
 
         this.words.push(word);
       });
-      console.log("words:", this.words);
+      console.log("words after load:", this.words);
     },
 
     getWords(
@@ -169,10 +166,10 @@ export const useVocabStore = defineStore("vocabStore", {
         }
       }
 
-      this.lastUsedWord = combinedWords[0].wordNative;
-
       if (shuffleCompletely) {
         combinedWords = combinedWords.sort(() => Math.random() - 0.5);
+      } else {
+        this.lastUsedWord = combinedWords[0].wordNative;
       }
 
       const slice = combinedWords.slice(0, n);
@@ -180,7 +177,7 @@ export const useVocabStore = defineStore("vocabStore", {
     },
 
     getVocabStatistics() {
-      let relevantWords = this.words;
+      let relevantWords:Word[] = this.words;
       const now = new Date();
 
       // remove words that are not in an active context
@@ -190,22 +187,23 @@ export const useVocabStore = defineStore("vocabStore", {
         });
       });
 
-      const dueCards = relevantWords.filter((word) => {
-        return word.due && new Date(word.due) < now;
+      const dueWords = relevantWords.filter((word) => {
+        return word.due && word.due < now;
       });
       const newCards = relevantWords.filter((word) => {
-        return !word.due;
+        return typeof word.due === "undefined";
       });
       const notDueCards = relevantWords.filter((word) => {
-        return word.due && new Date(word.due) > now;
+        return word.due && word.due > now;
       });
 
-      return {
+      const returnObject = {
         nr_of_words: relevantWords.length,
-        nr_of_due_words: dueCards.length,
+        nr_of_due_words: dueWords.length,
         nr_of_new_words: newCards.length,
         nr_of_not_due_words: notDueCards.length,
       };
+      return returnObject
     },
 
     getPreviouslyUnseenWords(n: number): Word[] {
@@ -224,7 +222,6 @@ export const useVocabStore = defineStore("vocabStore", {
 
     registerRepetition(wordNative: string, rating: number, max_rating: number) {
       let word = this.words.find((word) => word.wordNative === wordNative);
-      console.log("found matching word", word);
       let card: Card;
 
       // if word was never rated, ignore actual rating and just save it
@@ -249,12 +246,12 @@ export const useVocabStore = defineStore("vocabStore", {
           due: word.due,
           stability: word.stability,
           difficulty: word.difficulty,
-          elapsed_days: word.elapsedDays,
-          scheduled_days: word.scheduledDays,
+          elapsed_days: word.elapsed_days,
+          scheduled_days: word.scheduled_days,
           reps: word.reps,
           lapses: word.lapses,
           state: word.state,
-          last_review: word.lastReview,
+          last_review: word.last_review,
         };
         const schedulingCards: RecordLog = f.repeat(card, new Date());
         switch (mappedRatingRounded) {
@@ -279,14 +276,13 @@ export const useVocabStore = defineStore("vocabStore", {
       word.due = card.due;
       word.stability = card.stability;
       word.difficulty = card.difficulty;
-      word.elapsedDays = card.elapsed_days;
-      word.scheduledDays = card.scheduled_days;
+      word.elapsed_days = card.elapsed_days;
+      word.scheduled_days = card.scheduled_days;
       word.reps = card.reps;
       word.lapses = card.lapses;
       word.state = card.state;
-      word.lastReview = card.last_review;
+      word.last_review = card.last_review;
 
-      console.log("word now", word);
 
       this.localLearningData[word.wordNative] = word 
       this.saveLearningDataLocally()

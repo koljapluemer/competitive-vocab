@@ -1,0 +1,3 @@
+- fix new cards being immediately due (always right after the next one)
+    - could simply shuffle or ask for longest due?
+- fix home screen statistics
