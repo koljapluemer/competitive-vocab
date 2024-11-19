@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col" v-if="currentWord">
-    <h2 class="text-2xl mb-4 font-bold text-center">{{ currentWord.word_native }}</h2>
+    <h2 class="text-2xl mb-4 font-bold text-center">{{ currentWord.wordNative }}</h2>
     <h2 class="text-2xl my-4 text-center">
       {{ hintString }}
     </h2>
@@ -13,7 +13,7 @@
 
     <small class="">Diacritics are optional.</small>
 
-    <!-- :style="{ width: `${currentWord.word_target_short.length * 1.3}em` }" -->
+    <!-- :style="{ width: `${currentWord.wordTarget_short.length * 1.3}em` }" -->
 
     <div class="flex flex-col gap-2 mt-10">
       <button class="btn btn-sm" @click="revealLetter">Reveal 1 Letter</button>
@@ -39,13 +39,13 @@ const inputAnswer = ref("");
 const hintString = ref("");
 
 const loadNewWord = () => {
-  // Select a random word and create cloze deletion for `word_native`
+  // Select a random word and create cloze deletion for `wordNative`
   const wordArr = vocabStore.getWords(1, true);
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
     inputAnswer.value = "";
     hintString.value = "٭".repeat(
-      normalizeArabicText(currentWord.value.word_target_short).length
+      normalizeArabicText(currentWord.value.wordTarget_short).length
     );
   }
 };
@@ -53,12 +53,12 @@ const loadNewWord = () => {
 const checkAnswer = () => {
   if (
     normalizeArabicText(inputAnswer.value) ===
-    normalizeArabicText(currentWord.value.word_target_short)
+    normalizeArabicText(currentWord.value.wordTarget_short)
   ) {
     score.value += 5;
     userStore.updateScore(score.value); // Update score in global store and Supabase
     // Register the correct answer with progressStore to update scheduling
-    vocabStore.registerRepetition(currentWord.value.word_native, 2, 3);
+    vocabStore.registerRepetition(currentWord.value.wordNative, 2, 3);
     logDataInSupabase(2, 3);
     userStore.addMoney(1);
 
@@ -69,7 +69,7 @@ const checkAnswer = () => {
 const giveUp = () => {
   score.value -= 1;
   userStore.updateScore(score.value); // Update score
-  vocabStore.registerRepetition(currentWord.value.word_native, 1, 3);
+  vocabStore.registerRepetition(currentWord.value.wordNative, 1, 3);
   logDataInSupabase(1, 3);
   loadNewWord(); // Load a new word
 };
@@ -77,9 +77,9 @@ const giveUp = () => {
 const logDataInSupabase = async (score, max_score) => {
   const { data, error } = await supabase.from("learn_log").insert([
     {
-      word_id: currentWord.value.word_native,
-      displayed_front: currentWord.value.word_native,
-      displayed_back: currentWord.value.word_target_short,
+      word_id: currentWord.value.wordNative,
+      displayed_front: currentWord.value.wordNative,
+      displayed_back: currentWord.value.wordTarget_short,
       score: score,
       max_score: max_score,
       game_mode: "WriteTarget",
@@ -101,7 +101,7 @@ const revealLetter = () => {
   }
 
   const hintArr = hintString.value.split("");
-  const targetArr = normalizeArabicText(currentWord.value.word_target_short).split("");
+  const targetArr = normalizeArabicText(currentWord.value.wordTarget_short).split("");
 
   if (hintArr.includes("٭")) {
     let randomIndex = Math.floor(Math.random() * hintArr.length);

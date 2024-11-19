@@ -1,6 +1,6 @@
 <template>
   <div class="text-center">
-    <h2 class="text-2xl mb-4 font-bold">{{ currentWord.word_target }}</h2>
+    <h2 class="text-2xl mb-4 font-bold">{{ currentWord.wordTarget }}</h2>
 
     <div class="flex justify-center items-center mb-4 font-bold text-xl">
       <!-- Display word with cloze deletion input -->
@@ -38,7 +38,7 @@ const inputAnswer = ref("");
 const parts = ref([]); // Array to store parts of the word, including cloze input
 
 const loadNewWord = () => {
-  // Select a random word and create cloze deletion for `word_native`
+  // Select a random word and create cloze deletion for `wordNative`
   const wordArr = vocabStore.getWords(1);
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
@@ -47,7 +47,7 @@ const loadNewWord = () => {
 };
 
 const createCloze = () => {
-  const wordNative = currentWord.value.word_native;
+  const wordNative = currentWord.value.wordNative;
   const start = Math.floor(Math.random() * (wordNative.length - 2)); // Start index for deletion
   const length = Math.min(3, wordNative.length - start); // Ensure at least 2 letters but not exceeding the word length
   const end = start + length;
@@ -66,7 +66,7 @@ const checkAnswer = () => {
     score.value += 5;
     userStore.updateScore(score.value); // Update score in global store and Supabase
     // Register the correct answer with progressStore to update scheduling
-    vocabStore.registerRepetition(currentWord.value.word_native, 2, 3);
+    vocabStore.registerRepetition(currentWord.value.wordNative, 2, 3);
     logDataInSupabase(2, 3);
     userStore.addMoney(1);
     loadNewWord(); // Load the next word if answer is correct
@@ -76,26 +76,18 @@ const checkAnswer = () => {
 const giveUp = () => {
   score.value -= 1;
   userStore.updateScore(score.value); // Update score
-  vocabStore.registerRepetition(currentWord.value.word_native, 1, 3);
+  vocabStore.registerRepetition(currentWord.value.wordNative, 1, 3);
   logDataInSupabase(1, 3);
   loadNewWord(); // Load a new word
 };
 
 const logDataInSupabase = async (score, max_score) => {
-  // Log the current score in Supabase
-  // use table: learn_log
-  // with following properties:
-  // word_id = currentWord.value.word_native
-  // displayed_front = currentWord.word_target
-  // displayed_back = parts
-  // score = score
-  // max_score = max_score
-  // game_mode = "ClozeTarget"
+
 
   const { data, error } = await supabase.from("learn_log").insert([
     {
-      word_id: currentWord.value.word_native,
-      displayed_front: currentWord.value.word_target,
+      word_id: currentWord.value.wordNative,
+      displayed_front: currentWord.value.wordTarget,
       displayed_back: parts.value,
       score: score,
       max_score: max_score,

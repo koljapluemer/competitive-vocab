@@ -1,6 +1,6 @@
 <template>
   <div class="text-center">
-    <h2 class="text-2xl mb-4 font-bold">{{ currentWord.word_native }}</h2>
+    <h2 class="text-2xl mb-4 font-bold">{{ currentWord.wordNative }}</h2>
     <h2 class="text-3xl mb-4 font-bold">{{ wordWithCloze }}</h2>
 
     <!-- loop answer buttons -->
@@ -37,7 +37,7 @@ const correctAnswer = ref(""); // Correct answer
 const numberOfWrongClicks = ref(0);
 
 const loadNewWord = () => {
-  // Select a random word and create cloze deletion for `word_native`
+  // Select a random word and create cloze deletion for `wordNative`
   const wordArr = vocabStore.getWords(1);
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
@@ -51,8 +51,8 @@ const createCloze = () => {
   // do not replace spaces or punctuation (only arabic letters)
   // create 4 buttons, 3 of them wrong with random arabic letters (which are not the right ones)
 
-  const wordNative = currentWord.value.word_native;
-  const wordTarget = currentWord.value.word_target;
+  const wordNative = currentWord.value.wordNative;
+  const wordTarget = currentWord.value.wordTarget;
   let replacedIndex = Math.floor(Math.random() * wordTarget.length); // Start index for deletion
 
   // check for ARABIC letter ا ب ...
@@ -101,7 +101,7 @@ const checkAnswer = (selected) => {
 
     const score = Math.max(0, 4 - numberOfWrongClicks.value);
     vocabStore.registerRepetition(
-      currentWord.value.word_native,
+      currentWord.value.wordNative,
       score,
       4
     );
@@ -121,8 +121,8 @@ const logDataInSupabase = async (score, max_score) => {
   // Log the current score in Supabase
   // use table: learn_log
   // with following properties:
-  // word_id = currentWord.value.word_native
-  // displayed_front = currentWord.word_native
+  // word_id = currentWord.value.wordNative
+  // displayed_front = currentWord.wordNative
   // displayed_back = wordWithCloze
   // score = score
   // max_score = max_score
@@ -130,8 +130,8 @@ const logDataInSupabase = async (score, max_score) => {
 
   const { data, error } = await supabase.from("learn_log").insert([
     {
-      word_id: currentWord.value.word_native,
-      displayed_front: currentWord.value.word_native,
+      word_id: currentWord.value.wordNative,
+      displayed_front: currentWord.value.wordNative,
       displayed_back: wordWithCloze.value,
       score: score,
       max_score: max_score,

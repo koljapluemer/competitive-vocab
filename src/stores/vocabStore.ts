@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import { supabase } from "../supabase";
 import {
   createEmptyCard,
+  Card,
   formatDate,
   fsrs,
   generatorParameters,
@@ -13,12 +14,36 @@ import {
   RecordLog,
 } from "ts-fsrs";
 
+interface Word {
+  // supabase
+  wordNative: string;
+  wordTarget: string;
+  wordNativeShort?: string;
+  wordTargetShort?: string;
+  nativeLang?: string;
+  useAsWord?: boolean;
+  useAsSentence?: boolean;
+  context?: string;
+  wordTypeInfo?: string;
+  rootInfo?: string;
+  extraInfo?: string;
+  // local only
+  due?: Date;
+  stability?: number;
+  difficulty?: number;
+  elapsedDays?: number;
+  scheduledDays?: number;
+  reps?: number;
+  lapses?: number;
+  state?: number;
+  lastReview?: Date;
+}
+
 // first, create a simple store, ignoring fsrs for now
 export const useVocabStore = defineStore("vocabStore", {
   state: () => ({
-    words: [] as { word_native: string; word_target: string }[],
-    // localLearningData is NOT used dynamically, only when loading initially!!
-    localLearningData: {} as Record<string, any>,
+    words: [] as Word[],
+
     lastUsedWord: "" as string,
     vocabContexts: [
       {
@@ -38,46 +63,59 @@ export const useVocabStore = defineStore("vocabStore", {
       if (error) {
         console.error("Error loading vocabulary from Supabase:", error);
       }
-      this.words = data || [];
+      const wordsFromSupabase = data || [];
       const localLearningDataJSON = localStorage.getItem("localLearningData");
+      let localLearningData = {};
       if (localLearningDataJSON) {
-        this.localLearningData = JSON.parse(localLearningDataJSON);
-        console.log("Local learning data loaded:", this.localLearningData);
+        localLearningData = JSON.parse(localLearningDataJSON);
+        console.log("Local learning data loaded:", localLearningData);
         // add the rest of the data from localstorage to the word
-        this.words.forEach((word) => {
-          if (this.localLearningData[word.word_native]) {
-            Object.assign(word, this.localLearningData[word.word_native]);
-          }
-        });
       }
+      wordsFromSupabase.forEach((_word) => {
+        const word: Word = {
+          wordNative: _word["word_native"],
+          wordTarget: _word["word_target"],
+          wordNativeShort: _word["word_native_short"],
+          wordTargetShort: _word["word_target_short"],
+          nativeLang: _word["native_lang"],
+          useAsWord: _word["use_as_word"],
+          useAsSentence: _word["use_as_sentence"],
+          context: _word["context"],
+          wordTypeInfo: _word["word_type_info"],
+          rootInfo: _word["root_info"],
+          extraInfo: _word["extra_info"],
+        };
 
-      console.log("Words loaded: ", this.words);
+        // const wordLearningData = localLearningData[_word.wordNative];
+        // if (wordLearningData != null && wordLearningData != undefined) {
+        //   console.log("slapping in extra data:", _word.wordNative);
+        //   word.due = new Date(wordLearningData.due);
+        //   word.stability = wordLearningData.stability;
+        //   word.difficulty = wordLearningData.difficulty;
+        //   word.elapsedDays = wordLearningData.elapsed_days;
+        //   word.scheduledDays = wordLearningData.scheduled_days;
+        //   word.reps = wordLearningData.reps;
+        //   word.lapses = wordLearningData.lapses;
+        //   word.state = wordLearningData.state;
+        // }
 
-      // TODO: right now I just hardcoded the contexts above
-      // (so Marta has hers activated and mine deactivated)
-      // ...that's rather hacky
-      // code below starts dynamically getting contexts from the data
-
-      // get an array of unique values for the prop "context" in the supabase data we just got
-      // const contexts = Array.from(new Set(this.words.map((word) => word.context)));
-      // console.log("Contexts: ", contexts);
+        this.words.push(word);
+      });
+      console.log("words:", this.words);
     },
 
     getWords(
       n: number,
       ignoreWordsWithoutTargetShort = false,
       shuffleCompletely = false
-    ) {
-      //   first, get all cards that are actually due, sorted by nextDue (first due first in list)
-      // words[] is the authorative list, and localLearningData is used to check whether learning data exist per word
-      //   therefor, ONLYYY words in words[] are considered
-      // relevant prop is simply called "due" and has format due:"2024-11-12T14:29:29.441Z"
-      let relevantWords = this.words;
+    ): Word[] {
+      let relevantWords: Word[] = this.words;
 
+      // TODO: see if this works as intended
+      // (not sure where we use this flag, though)
       if (ignoreWordsWithoutTargetShort) {
-        // check for property word_target_short
         relevantWords = relevantWords.filter((word) => {
-          return word.word_target_short;
+          return word.wordTargetShort;
         });
       }
 
@@ -87,69 +125,55 @@ export const useVocabStore = defineStore("vocabStore", {
           return context.active && word.context === context.name;
         });
       });
-
       console.log("Words in active context: ", relevantWords.length);
 
+      // get words that are due
+      // could sort these, but it also kinda doesn't matter, due is due
       const now = new Date();
-      const dueCards = relevantWords.filter((word) => {
-        return word.due && new Date(word.due) < now;
+      const dueWords = relevantWords.filter((word) => {
+        return word.due && word.due < now;
       });
+      console.log("dueWords: ", dueWords);
 
-      const dueCardsSorted = dueCards.sort((a, b) => {
-        return new Date(a.due) - new Date(b.due);
-      });
+      // words never learned before (shuffled)
+      const wordsNeverLearnedBefore = relevantWords
+        .filter((word) => {
+          return typeof word.due === "undefined";
+        })
+        .sort(() => Math.random() - 0.5);
+      console.log("wordsNeverLearnedBefore", wordsNeverLearnedBefore);
 
-      console.log("dueCardsSorted: ", dueCardsSorted);
+      // words learned before, but not due (shuffled)
+      const wordsDueInTheFuture = relevantWords
+        .filter((word) => {
+          return word.due && word.due > now;
+        })
+        .sort(() => Math.random() - 0.5);
+      console.log("words due in the future", wordsDueInTheFuture);
 
-      //   make another array:
-      // this one should contain two types of words
-      // those that are not due, and those that are not yet in localLearningData
-      // new ones (not yet in data) should come first, then the not due ones, sorted by due (which IS NOT CALLED 'nextDue' BUT JUST 'due')
-
-      // "!due" refers to the absence of that property, not to the card not being due
-      // (since it is a timestamp, not set before it was at least seen once)
-      const newCards = relevantWords.filter((word) => {
-        return !word.due;
-      });
-      console.log("newCards: ", newCards);
-
-      const notDueCards = relevantWords.filter((word) => {
-        return word.due && new Date(word.due) > now;
-      });
-
-      // we sort these randomly, otherwise we have a lot of the same repetitions
-      const notDueCardsSortedRandomly = notDueCards.sort(
-        () => Math.random() - 0.5
-      );
-      console.log("notDueCardsSortedByDue: ", notDueCardsSortedRandomly);
-
-      // make one combined array: dueCardsSorted + newCards + notDueCardsSortedByDue
-      // return the first n elements of this array
-      let combined = [
-        ...dueCardsSorted,
-        ...newCards,
-        ...notDueCardsSortedRandomly,
+      let combinedWords = [
+        ...dueWords,
+        ...wordsNeverLearnedBefore,
+        ...wordsDueInTheFuture,
       ];
 
-      // remove lastUsedWord from the array (so we don't get the same word twice in a row)
       if (this.lastUsedWord) {
-        const index = combined.findIndex((word) => {
-          return word.word_native === this.lastUsedWord;
+        const index = combinedWords.findIndex((word) => {
+          return word.wordNative === this.lastUsedWord;
         });
         if (index !== -1) {
-          combined.splice(index, 1);
+          combinedWords.splice(index, 1);
         }
       }
 
-      // update lastUsedWord
-      this.lastUsedWord = combined[0].word_native;
+      this.lastUsedWord = combinedWords[0].wordNative;
 
-      console.log("Combined Cards, Sorted: ", combined);
       if (shuffleCompletely) {
-        combined = combined.sort(() => Math.random() - 0.5);
+        combinedWords = combinedWords.sort(() => Math.random() - 0.5);
       }
-      
-      return combined.slice(0, n);
+
+      const slice = combinedWords.slice(0, n);
+      return slice;
     },
 
     getVocabStatistics() {
@@ -174,56 +198,61 @@ export const useVocabStore = defineStore("vocabStore", {
       });
 
       return {
-        nr_of_cards: relevantWords.length,
-        nr_of_due_cards: dueCards.length,
-        nr_of_new_cards: newCards.length,
-        nr_of_not_due_cards: notDueCards.length,
+        nr_of_words: relevantWords.length,
+        nr_of_due_words: dueCards.length,
+        nr_of_new_words: newCards.length,
+        nr_of_not_due_words: notDueCards.length,
       };
     },
 
-    getPreviouslyUnseenWords(n: number) {
-      // get all words that have no t been seen, aka have no due date
-      let newWords = this.words.filter((word) => {
-        return !word.due;
-      });
-
-      // remove words that are not in an active context
-      newWords = newWords.filter((word) => {
-        return this.vocabContexts.some((context) => {
-          return context.active && word.context === context.name;
-        });
-      });
-
-      console.log("Words in active context: ", newWords.length);
-
-      console.log(`New words: ${newWords.length}`);
-      newWords = newWords.sort(() => Math.random() - 0.5);
-
-      return newWords.slice(0, n);
+    getPreviouslyUnseenWords(n: number): Word[] {
+      return this.words
+        .filter((word) => {
+          return typeof word.due === "undefined";
+        })
+        .filter((word) => {
+          return this.vocabContexts.some((context) => {
+            return context.active && word.context === context.name;
+          });
+        })
+        .sort(() => Math.random() - 0.5)
+        .slice(0, n);
     },
 
     registerRepetition(wordNative: string, rating: number, max_rating: number) {
-      const word = this.words.find((word) => word.word_native === wordNative);
+      let word = this.words.find((word) => word.wordNative === wordNative);
+      console.log("found matching word", word);
+      let card: Card;
+
       // if word was never rated, ignore actual rating and just save it
       // check by seeing if in words it has a due date set:
-      if (!word.due) {
-        console.info("New card registered: ", wordNative);
-        this.createFSRSCard(wordNative);
-        return;
+      if (typeof word.due === "undefined") {
+        console.info("New word registered: ", wordNative);
+        card = createEmptyCard();
       } else {
         const params: FSRSParameters = generatorParameters({
           maximum_interval: 1000,
         });
         const f: FSRS = new FSRS(params);
 
-        console.info("Previously registered card rated: ", rating);
+        console.info("Previously registered word rated: ", rating);
         // map the rating from min 0-max-rating to 0-3
         const mappedRating = (3 * rating) / max_rating;
         // round down
         const mappedRatingRounded = Math.floor(mappedRating);
         // use ts-fsrs grades:
         // 0: Again, 1: Hard, 2: Good, 3: Easy
-        let card = word;
+        card = {
+          due: word.due,
+          stability: word.stability,
+          difficulty: word.difficulty,
+          elapsed_days: word.elapsedDays,
+          scheduled_days: word.scheduledDays,
+          reps: word.reps,
+          lapses: word.lapses,
+          state: word.state,
+          last_review: word.lastReview,
+        };
         const schedulingCards: RecordLog = f.repeat(card, new Date());
         switch (mappedRatingRounded) {
           case 0:
@@ -242,31 +271,36 @@ export const useVocabStore = defineStore("vocabStore", {
             console.error("Rating out of range: ", mappedRatingRounded);
             return;
         }
-
-        // update word in words[] with new data
-        // (also save the changes to localstorage)
-        this.words = this.words.map((word) => {
-          if (word.word_native === wordNative) {
-            return card;
-          } else {
-            return word;
-          }
-        });
-
-        // loop properties of card and update localLearningData
-        const cardData = { ...card };
-        Object.keys(cardData).forEach((key) => {
-          this.localLearningData[wordNative][key] = cardData[key];
-        });
-        console.log("local learning data updated: ", this.localLearningData);
-
-        localStorage.setItem(
-          "localLearningData",
-          JSON.stringify(this.localLearningData)
-        );
       }
+
+      word.due = card.due;
+      word.stability = card.stability;
+      word.difficulty = card.difficulty;
+      word.elapsedDays = card.elapsed_days;
+      word.scheduledDays = card.scheduled_days;
+      word.reps = card.reps;
+      word.lapses = card.lapses;
+      word.state = card.state;
+      word.lastReview = card.last_review;
+
+      console.log("word now", word);
+
+      // console.log("added card to word, word is now", word);
+      // console.log("words are now", this.words);
+
+      // let localLearningData = {};
+      // this.words.forEach((word) => {
+      //   console.log('adding word', word)
+      //   localLearningData[word.wordNative] = word;
+      // });
+
+      // localStorage.setItem(
+      //   "localLearningData",
+      //   JSON.stringify(localLearningData)
+      // );
     },
 
+    // TODO: likely broken, at least awkward in new paradigm
     // example sentences should be an array, may not exist yet
     addExampleSentenceToWord(wordNative: string, exampleSentence: string) {
       if (!this.localLearningData[wordNative]) {
@@ -285,17 +319,6 @@ export const useVocabStore = defineStore("vocabStore", {
       );
     },
 
-    // this is called when a word is not yet rated
-    // and not yet stored in localstorage
-    createFSRSCard(wordNative: string) {
-      const card = createEmptyCard();
-      this.localLearningData[wordNative] = card;
-      localStorage.setItem(
-        "localLearningData",
-        JSON.stringify(this.localLearningData)
-      );
-    },
-
     toggleContext(contextName: string) {
       // find the context in the array and toggle its active property
       const context = this.vocabContexts.find((context) => {
@@ -307,10 +330,7 @@ export const useVocabStore = defineStore("vocabStore", {
     },
 
     resetLocalStorage() {
-      localStorage.setItem(
-        "localLearningData",
-        JSON.stringify({})
-      );
-    }
+      localStorage.setItem("localLearningData", JSON.stringify({}));
+    },
   },
 });

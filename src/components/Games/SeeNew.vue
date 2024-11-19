@@ -1,8 +1,8 @@
 <template>
   <div class="text-center" v-if="currentWord">
-    <h2 class="text-2xl mb-4 font-bold border-b-2 pb-4">{{ currentWord.word_native }}</h2>
+    <h2 class="text-2xl mb-4 font-bold border-b-2 pb-4">{{ currentWord.wordNative }}</h2>
     <h2 class="text-2xl mb-4 font-bold pb-4">
-      {{ currentWord.word_target }}
+      {{ currentWord.wordTarget }}
     </h2>
 
     <button class="btn btn-secondary" @click="showNextCard()">Got It</button>
@@ -17,7 +17,7 @@ import { supabase } from "../../supabase";
 
 const vocabStore = useVocabStore();
 const userStore = useUserStore();
-const currentWord = ref<{ id: string; word_native: string; word_target: string } | null>(
+const currentWord = ref<{ id: string; wordNative: string; wordTarget: string } | null>(
   null
 );
 const isRevealed = ref(false);
@@ -39,7 +39,7 @@ const showNextCard = () => {
   if (!currentWord.value) return;
   const newScore = userStore.userScore + 1;
   userStore.updateScore(newScore); // Update score in Supabase and userStore
-  vocabStore.registerRepetition(currentWord.value.word_native, 0, 0);
+  vocabStore.registerRepetition(currentWord.value.wordNative, 0, 0);
   logDataInSupabase(0, 0);
   loadNewCard();
 };
@@ -48,18 +48,18 @@ const logDataInSupabase = async (score, max_score) => {
   // Log the current score in Supabase
   // use table: learn_log
   // with following properties:
-  // word_id = currentWord.value.word_native
-  // displayed_front = currentWord.word_native
-  // displayed_back = currentWord.word_target
+  // word_id = currentWord.value.wordNative
+  // displayed_front = currentWord.wordNative
+  // displayed_back = currentWord.wordTarget
   // score = -1
   // max_score = -1
   // game_mode = "SeeNew"
 
   const { data, error } = await supabase.from("learn_log").insert([
     {
-      word_id: currentWord.value.word_native,
-      displayed_front: currentWord.value.word_native,
-      displayed_back: currentWord.value.word_target,
+      word_id: currentWord.value.wordNative,
+      displayed_front: currentWord.value.wordNative,
+      displayed_back: currentWord.value.wordTarget,
       score: -1,
       max_score: -1,
       game_mode: "SeeNew",

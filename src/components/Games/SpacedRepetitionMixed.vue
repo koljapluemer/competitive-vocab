@@ -1,10 +1,10 @@
 <template>
   <div class="text-center" v-if="currentWord">
     <h2 class="text-2xl mb-4 font-bold border-b-2 pb-4">
-      {{ reversedQuestion ? currentWord.word_target : currentWord.word_native }}
+      {{ reversedQuestion ? currentWord.wordTarget : currentWord.wordNative }}
     </h2>
     <h2 class="text-2xl mb-4 font-bold pb-4" v-if="isRevealed">
-      {{ reversedQuestion ? currentWord.word_native : currentWord.word_target }}
+      {{ reversedQuestion ? currentWord.wordNative : currentWord.wordTarget }}
     </h2>
     <button v-if="!isRevealed" class="btn btn-primary" @click="revealCard">Reveal</button>
 
@@ -25,7 +25,7 @@ import { useVocabStore } from "../../stores/vocabStore";
 
 const vocabStore = useVocabStore();
 const userStore = useUserStore();
-const currentWord = ref<{ id: string; word_native: string; word_target: string } | null>(
+const currentWord = ref<{ id: string; wordNative: string; wordTarget: string } | null>(
   null
 );
 const isRevealed = ref(false);
@@ -57,7 +57,7 @@ const rateCard = (ratingString) => {
     good: 2,
     easy: 3,
   }[ratingString];
-  vocabStore.registerRepetition(currentWord.value.word_native, rating, 3);
+  vocabStore.registerRepetition(currentWord.value.wordNative, rating, 3);
   logDataInSupabase(rating, 3);
   loadNewCard();
 };
@@ -67,13 +67,13 @@ const logDataInSupabase = async (score, max_score) => {
 
   const { data, error } = await supabase.from("learn_log").insert([
     {
-      word_id: currentWord.value.word_native,
+      word_id: currentWord.value.wordNative,
       displayed_front: reversedQuestion.value
-        ? currentWord.value.word_target
-        : currentWord.value.word_native,
+        ? currentWord.value.wordTarget
+        : currentWord.value.wordNative,
       displayed_back: reversedQuestion.value
-        ? currentWord.value.word_native
-        : currentWord.value.word_target,
+        ? currentWord.value.wordNative
+        : currentWord.value.wordTarget,
       score,
       max_score,
       game_mode: "SpacedRepetitionMixed",

@@ -1,7 +1,7 @@
 <template>
   <div class="text-center">
     <h2 class="text-4xl my-10 font-bold">
-      {{ currentQuestion.word_native || "Loading..." }}
+      {{ currentQuestion.wordNative || "Loading..." }}
     </h2>
     <div class="flex flex-col gap-2" v-if="answerOptions.length">
       <!-- TODO: shuffle this but not broken -->
@@ -48,21 +48,21 @@ const loadNewQuestion = () => {
   numberOfWrongClicks.value = 0;
   answerOptions.value = [];
   for (const word of wordsForPuzzle) {
-    answerOptions.value.push(word.word_target);
+    answerOptions.value.push(word.wordTarget);
   }
   answerOptions.value = answerOptions.value.sort(() => 0.5 - Math.random());
 };
 
 // Handle answer selection
 const selectAnswer = (selected) => {
-  if (selected === currentQuestion.value.word_target) {
+  if (selected === currentQuestion.value.wordTarget) {
     const newScore = userStore.userScore + 3;
     userStore.updateScore(newScore); // Update score in Supabase and userStore
 
     // Register the correct answer with progressStore to update scheduling
     const registeredScore = Math.max(0, 4 - numberOfWrongClicks.value);
     vocabStore.registerRepetition(
-      currentQuestion.value.word_native,
+      currentQuestion.value.wordNative,
       registeredScore,
       4
     );
@@ -81,8 +81,8 @@ const logDataInSupabase = async (score, max_score) => {
   // Log the current score in Supabase
   // use table: learn_log
   // with following properties:
-  // word_id = currentWord.value.word_native
-  // displayed_front = currentQuestion.word_native
+  // word_id = currentWord.value.wordNative
+  // displayed_front = currentQuestion.wordNative
   // displayed_back = answerOptions to string
   // score
   // max_score
@@ -90,8 +90,8 @@ const logDataInSupabase = async (score, max_score) => {
 
   const { data, error } = await supabase.from("learn_log").insert([
     {
-      word_id: currentQuestion.value.word_native,
-      displayed_front: currentQuestion.value.word_native,
+      word_id: currentQuestion.value.wordNative,
+      displayed_front: currentQuestion.value.wordNative,
       displayed_back: answerOptions.value.join(", "),
       score: score,
       max_score: max_score,

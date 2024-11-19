@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col" v-if="currentWord">
-    <h2 class="text-3xl mb-4 font-bold text-center">{{ currentWord.word_target }}</h2>
-    <h2 class="text-2xl mb-4 font-bold text-center">{{ currentWord.word_native }}</h2>
+    <h2 class="text-3xl mb-4 font-bold text-center">{{ currentWord.wordTarget }}</h2>
+    <h2 class="text-2xl mb-4 font-bold text-center">{{ currentWord.wordNative }}</h2>
 
     <div class="border rounded p-4 my-4 flex flex-col gap-2">
       <h3 class="font-bold">Example Sentences</h3>
@@ -42,7 +42,7 @@ const currentWord = ref({});
 const inputAnswer = ref("");
 
 const loadNewWord = () => {
-  // Select a random word and create cloze deletion for `word_native`
+  // Select a random word and create cloze deletion for `wordNative`
   const wordArr = vocabStore.getWords(1, true);
   if (wordArr.length > 0) {
     currentWord.value = wordArr[0];
@@ -51,8 +51,8 @@ const loadNewWord = () => {
 };
 
 const addSentence = async () => {
-  vocabStore.addExampleSentenceToWord(currentWord.value.word_native, inputAnswer.value);
-  vocabStore.registerRepetition(currentWord.value.word_native, 2, 3);
+  vocabStore.addExampleSentenceToWord(currentWord.value.wordNative, inputAnswer.value);
+  vocabStore.registerRepetition(currentWord.value.wordNative, 2, 3);
   logDataInSupabase(2, 3);
   score.value += 2;
   userStore.updateScore(score.value);
@@ -63,9 +63,9 @@ const addSentence = async () => {
 const logDataInSupabase = async (score, max_score) => {
   const { data, error } = await supabase.from("learn_log").insert([
     {
-      word_id: currentWord.value.word_native,
-      displayed_front: currentWord.value.word_native,
-      displayed_back: currentWord.value.word_target_short,
+      word_id: currentWord.value.wordNative,
+      displayed_front: currentWord.value.wordNative,
+      displayed_back: currentWord.value.wordTarget_short,
       score: score,
       max_score: max_score,
       game_mode: "WriteTarget",
