@@ -33,12 +33,12 @@
     </button>
 
     <h3 class="text-xl mt-10 mb-2">specials</h3>
-    <button class="btn w-full mb-2" @click="$router.push('/game-new')">
+    <!-- <button class="btn w-full mb-2" @click="$router.push('/game-new')">
       See New Words
     </button>
     <button class="btn w-full mb-2" @click="$router.push('/game-add-sentences')">
       Add Example Sentences
-    </button>
+    </button> -->
   </div>
 </template>
 
