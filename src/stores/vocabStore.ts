@@ -43,7 +43,9 @@ interface Word {
 export const useVocabStore = defineStore("vocabStore", {
   state: () => ({
     words: [] as Word[],
-
+    // basically a write-only
+    // gets read once, at app start, then is only used to save learning progress locally
+    localLearningData: {},
     lastUsedWord: "" as string,
     vocabContexts: [
       {
@@ -65,10 +67,9 @@ export const useVocabStore = defineStore("vocabStore", {
       }
       const wordsFromSupabase = data || [];
       const localLearningDataJSON = localStorage.getItem("localLearningData");
-      let localLearningData = {};
       if (localLearningDataJSON) {
-        localLearningData = JSON.parse(localLearningDataJSON);
-        console.log("Local learning data loaded:", localLearningData);
+        this.localLearningData = JSON.parse(localLearningDataJSON);
+        console.log("Local learning data loaded:", this.localLearningData);
         // add the rest of the data from localstorage to the word
       }
       wordsFromSupabase.forEach((_word) => {
@@ -86,18 +87,20 @@ export const useVocabStore = defineStore("vocabStore", {
           extraInfo: _word["extra_info"],
         };
 
-        // const wordLearningData = localLearningData[_word.wordNative];
-        // if (wordLearningData != null && wordLearningData != undefined) {
-        //   console.log("slapping in extra data:", _word.wordNative);
-        //   word.due = new Date(wordLearningData.due);
-        //   word.stability = wordLearningData.stability;
-        //   word.difficulty = wordLearningData.difficulty;
-        //   word.elapsedDays = wordLearningData.elapsed_days;
-        //   word.scheduledDays = wordLearningData.scheduled_days;
-        //   word.reps = wordLearningData.reps;
-        //   word.lapses = wordLearningData.lapses;
-        //   word.state = wordLearningData.state;
-        // }
+        const wordLearningData = this.localLearningData[word.wordNative];
+        if (wordLearningData != null && wordLearningData != undefined) {
+          word.due = new Date(wordLearningData.due);
+          word.stability = wordLearningData.stability;
+          word.difficulty = wordLearningData.difficulty;
+          word.elapsedDays = wordLearningData.elapsed_days;
+          word.scheduledDays = wordLearningData.scheduled_days;
+          word.reps = wordLearningData.reps;
+          word.lapses = wordLearningData.lapses;
+          word.state = wordLearningData.state;
+          word.lastReview = wordLearningData.lastReview
+          console.log("slapped in extra data:",word);
+
+        }
 
         this.words.push(word);
       });
@@ -285,19 +288,15 @@ export const useVocabStore = defineStore("vocabStore", {
 
       console.log("word now", word);
 
-      // console.log("added card to word, word is now", word);
-      // console.log("words are now", this.words);
+      this.localLearningData[word.wordNative] = word 
+      this.saveLearningDataLocally()
+    },
 
-      // let localLearningData = {};
-      // this.words.forEach((word) => {
-      //   console.log('adding word', word)
-      //   localLearningData[word.wordNative] = word;
-      // });
-
-      // localStorage.setItem(
-      //   "localLearningData",
-      //   JSON.stringify(localLearningData)
-      // );
+    saveLearningDataLocally() {
+      localStorage.setItem(
+        "localLearningData",
+        JSON.stringify(this.localLearningData)
+      );
     },
 
     // TODO: likely broken, at least awkward in new paradigm
